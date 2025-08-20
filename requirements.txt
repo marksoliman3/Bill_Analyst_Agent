@@ -1,0 +1,11 @@
+# Core Python dependencies
+langgraph
+pydantic
+pandas
+python-dotenv
+langchain
+langchain-core
+langchain-openai
+
+# Development and testing
+pytest

@@ -1,0 +1,22 @@
+# Ignore Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore virtual environment
+.venv/
+
+# Ignore environment variables
+.env
+
+
+# Ignore Cline rules and Memory Bank
+.clinerules/
+MemoryBank/
+
+# Ignore data files
+data/
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
