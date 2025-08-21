@@ -23,13 +23,17 @@ class AgentState(TypedDict, total=False):
     ]  # Removed add_messages annotation to prevent message conversion
 
     # Judge outputs
-    judge_feedback: Optional[str]
+    judgement: Optional[Dict[str, Any]]  # Contains decision, feedback, and next_step
+    judge_feedback: Optional[str]  # For backward compatibility
     feedback: Optional[Dict[str, str]]  # keyed by analyst_id
-    next_step: Optional[str]
+    next_step: Optional[str]  # For backward compatibility
 
     # Retry tracking
     retry_attempts: Dict[str, int]  # track retries per analyst
 
+    # Consolidator output
+    consolidated_report: Optional[Dict[str, Any]]
+    
     # Final status
     status: str
 
@@ -49,5 +53,4 @@ class AnalystOutput(BaseModel):
 
 
 class JudgeOutput(BaseModel):
-    next_step: str
-    feedback: Optional[str]
+    judgement: Dict[str, Any]  # Contains decision, feedback, and next_step

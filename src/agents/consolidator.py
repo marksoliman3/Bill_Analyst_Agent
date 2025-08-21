@@ -29,11 +29,27 @@ def consolidate_results(state: AgentState) -> AgentState:
     bill_id = state.get("bill_id", "unknown")
     logger.info(f"[CONSOLIDATOR] Starting consolidation for bill {bill_id}")
 
+    # Get judgement from state
+    judgement = state.get("judgement")
+    
+    # Log the judgement for debugging
+    logger.info(f"[CONSOLIDATOR] Judgement from state: {judgement}")
+    
+    # Ensure judgement is a dictionary with the required fields
+    if not judgement or not isinstance(judgement, dict):
+        logger.warning(f"[CONSOLIDATOR] Judgement is not a dictionary or is empty: {judgement}")
+        # Create a default judgement
+        judgement = {
+            "decision": "UNKNOWN",
+            "feedback": None,
+            "next_step": "UNKNOWN"
+        }
+    
     consolidated = {
         "bill_extracts": state.get("bill_extracts"),
         "summary": state.get("summary"),
         "analyst_results": {},
-        "judgement": state.get("judgement"),
+        "judgement": judgement,
     }
 
     logger.info(f"[CONSOLIDATOR] Collecting outputs for bill {bill_id}")
@@ -59,6 +75,9 @@ def consolidate_results(state: AgentState) -> AgentState:
 
     state["consolidated_report"] = consolidated
     logger.info(f"[CONSOLIDATOR] Created consolidated report for bill {bill_id}")
+    
+    # Log the consolidated report for debugging
+    logger.info(f"[CONSOLIDATOR] Consolidated report: {consolidated}")
 
     # Count the number of analysts
     num_analysts = len(consolidated["analyst_results"])

@@ -46,11 +46,70 @@ def main():
         final_state = graph.invoke(state)
         logger.info(f"Completed graph execution for bill {bill_id}")
 
-        # Collect consolidated report if available
-        status = "completed" if "consolidated_report" in final_state else "failed"
-        state["status"] = status
-        logger.info(f"Bill {bill_id} processing {status}")
-
+        # Check if the bill was successfully processed
+        # We know the bill reached the consolidator because the graph is set up to always run the consolidator
+        # after the judge, so we just need to check the judge's decision
+        judgement = final_state.get("judgement", {})
+        
+        # Log the judgement to help with debugging
+        logger.info(f"Judgement for bill {bill_id}: {judgement}")
+        
+        # Log the judgement for debugging
+        logger.info(f"Judgement from state: {judgement}")
+        
+        # Check if judgement is None or empty
+        if not judgement or not isinstance(judgement, dict):
+            logger.warning(f"Judgement is not a dictionary or is empty: {judgement}")
+            # If judgement is None or empty, check the consolidated_report
+            consolidated_report = final_state.get("consolidated_report", {})
+            if consolidated_report and "judgement" in consolidated_report and isinstance(consolidated_report["judgement"], dict):
+                judgement = consolidated_report["judgement"]
+                logger.info(f"Using judgement from consolidated_report: {judgement}")
+            else:
+                # If judgement is still None or empty, create a default judgement
+                logger.warning(f"Judgement is still not a dictionary or is empty after checking consolidated_report: {judgement}")
+                judgement = {
+                    "decision": "UNKNOWN",
+                    "feedback": None,
+                    "next_step": "UNKNOWN"
+                }
+                logger.info(f"Using default judgement: {judgement}")
+        
+        # Extract next_step from judgement
+        next_step = ""
+        if isinstance(judgement, dict):
+            next_step = judgement.get("next_step", "")
+            logger.info(f"Next step from judgement: {next_step}")
+        else:
+            logger.warning(f"Judgement is not a dictionary: {judgement}")
+            next_step = "UNKNOWN"
+            logger.info(f"Using default next_step: {next_step}")
+        
+        # Check retry_attempts to see if any analyst has been asked to revise
+        retry_attempts = final_state.get("retry_attempts", {})
+        
+        if next_step == "PASS_TO_FINALIZE":
+            status = "completed"
+            logger.info(f"Bill {bill_id} processing completed successfully")
+        elif next_step.startswith("PASS_TO_ANALYST") or retry_attempts:
+            # If the judge's decision was to pass to an analyst, or if there are retry attempts,
+            # it means the bill needs revision
+            status = "needs_revision"
+            logger.info(f"Bill {bill_id} needs revision: judge requested changes")
+            
+            # Log retry attempts
+            if retry_attempts:
+                logger.info(f"Retry attempts recorded: {retry_attempts}")
+            else:
+                logger.info(f"No retry attempts recorded yet")
+        else:
+            # If the judge's decision was not to finalize or pass to an analyst, it means the bill failed
+            status = "failed"
+            logger.info(f"Bill {bill_id} processing failed: judge decision was {next_step}")
+        
+        # Update the status in the final state
+        final_state["status"] = status
+        
         results.append(final_state)
 
     # Convert results to DataFrame and save

@@ -12,6 +12,10 @@ from src.agents.summarizer import build_summarizer_subgraph
 from src.agents.analysts import ANALYST_SUBGRAPHS
 from src.agents.judge import build_judge_subgraph
 from src.agents.consolidator import build_consolidator_subgraph
+import logging
+
+# Get logger for this module
+logger = logging.getLogger(__name__)
 
 
 def build_full_graph() -> StateGraph:
@@ -65,15 +69,43 @@ def build_full_graph() -> StateGraph:
 
     # Conditional routing from judge
     def judge_router(state: AgentState) -> str:
-        next_step = state.get("judgement", {}).get("next_step", "PASS_TO_FINALIZE")
+        # Log the state for debugging
+        logger.info(f"[GRAPH] Judge router state: {state}")
+        
+        # Get the next_step from the judgement
+        judgement = state.get("judgement")
+        logger.info(f"[GRAPH] Judge router judgement: {judgement}")
+        
+        # Check if judgement is None or empty
+        if not judgement or not isinstance(judgement, dict):
+            logger.warning(f"[GRAPH] Judgement is not a dictionary or is empty: {judgement}")
+            # Try to get next_step from individual fields for backward compatibility
+            next_step = state.get("next_step", "PASS_TO_FINALIZE")
+            logger.info(f"[GRAPH] Using next_step from state: {next_step}")
+        else:
+            # Get next_step from judgement
+            next_step = judgement.get("next_step", "PASS_TO_FINALIZE")
+            logger.info(f"[GRAPH] Using next_step from judgement: {next_step}")
+        
         # If judge output is aggregated per analyst, handle accordingly
         if (
-            isinstance(state.get("judgement"), dict)
-            and "decision" not in state["judgement"]
+            isinstance(judgement, dict)
+            and "decision" not in judgement
         ):
             # pick first routing for simplicity in placeholder
-            for analyst, result in state["judgement"].items():
-                return result.get("next_step", "PASS_TO_FINALIZE")
+            for analyst, result in judgement.items():
+                if isinstance(result, dict) and "next_step" in result:
+                    next_step = result.get("next_step", "PASS_TO_FINALIZE")
+                    logger.info(f"[GRAPH] Using next_step from analyst result: {next_step}")
+                    break
+        
+        # If next_step is just PASS_TO_ANALYST without specifying which analyst,
+        # default to the first analyst in the list
+        if next_step == "PASS_TO_ANALYST" and analyst_keys:
+            # This is a fallback in case the judge.py file didn't specify a target analyst
+            logger.info(f"[GRAPH] No specific analyst specified for PASS_TO_ANALYST, defaulting to {analyst_keys[0]}")
+            return f"PASS_TO_ANALYST_{analyst_keys[0]}"
+            
         return next_step
 
     graph.add_conditional_edges(
