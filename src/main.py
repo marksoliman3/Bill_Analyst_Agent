@@ -34,6 +34,8 @@ def main():
             "retry_attempts": {},
             "status": "processing",
             "analyst_results": {},  # Initialize analyst_results as an empty dict
+            "analysts_needing_revision": [],  # Initialize analysts_needing_revision as an empty list
+            "current_revision_analyst": None,  # Initialize current_revision_analyst as None
         }
 
         # Run the full orchestrated graph
@@ -54,9 +56,6 @@ def main():
         # Log the judgement to help with debugging
         logger.info(f"Judgement for bill {bill_id}: {judgement}")
         
-        # Log the judgement for debugging
-        logger.info(f"Judgement from state: {judgement}")
-        
         # Check if judgement is None or empty
         if not judgement or not isinstance(judgement, dict):
             logger.warning(f"Judgement is not a dictionary or is empty: {judgement}")
@@ -69,9 +68,10 @@ def main():
                 # If judgement is still None or empty, create a default judgement
                 logger.warning(f"Judgement is still not a dictionary or is empty after checking consolidated_report: {judgement}")
                 judgement = {
-                    "decision": "UNKNOWN",
-                    "feedback": None,
-                    "next_step": "UNKNOWN"
+                    "decision": "REVISE",
+                    "next_step": "PASS_TO_FINALIZE",
+                    "analysts_needing_revision": [],
+                    "feedback_by_analyst": {}
                 }
                 logger.info(f"Using default judgement: {judgement}")
         
@@ -82,30 +82,45 @@ def main():
             logger.info(f"Next step from judgement: {next_step}")
         else:
             logger.warning(f"Judgement is not a dictionary: {judgement}")
-            next_step = "UNKNOWN"
+            next_step = "PASS_TO_FINALIZE"
             logger.info(f"Using default next_step: {next_step}")
         
         # Check retry_attempts to see if any analyst has been asked to revise
         retry_attempts = final_state.get("retry_attempts", {})
         
+        # Check for multi-analyst revision
+        analysts_needing_revision = final_state.get("analysts_needing_revision", [])
+        if analysts_needing_revision:
+            logger.info(f"Bill {bill_id} has analysts needing revision: {analysts_needing_revision}")
+        
         if next_step == "PASS_TO_FINALIZE":
             status = "completed"
             logger.info(f"Bill {bill_id} processing completed successfully")
-        elif next_step.startswith("PASS_TO_ANALYST") or retry_attempts:
-            # If the judge's decision was to pass to an analyst, or if there are retry attempts,
-            # it means the bill needs revision
+        elif next_step == "MULTI_ANALYST_REVISION" or retry_attempts or analysts_needing_revision:
+            # If the judge's decision was to pass to multiple analysts, or if there are retry attempts,
+            # or if there are analysts needing revision, it means the bill needs revision
             status = "needs_revision"
-            logger.info(f"Bill {bill_id} needs revision: judge requested changes")
+            
+            if next_step == "MULTI_ANALYST_REVISION":
+                logger.info(f"Bill {bill_id} needs revision: judge requested changes from multiple analysts")
             
             # Log retry attempts
             if retry_attempts:
                 logger.info(f"Retry attempts recorded: {retry_attempts}")
             else:
                 logger.info(f"No retry attempts recorded yet")
-        else:
-            # If the judge's decision was not to finalize or pass to an analyst, it means the bill failed
+            
+            # Log analysts needing revision
+            if analysts_needing_revision:
+                logger.info(f"Analysts needing revision: {analysts_needing_revision}")
+        elif next_step == "FAIL_BILL":
+            # If the judge's decision was to fail the bill
             status = "failed"
-            logger.info(f"Bill {bill_id} processing failed: judge decision was {next_step}")
+            logger.info(f"Bill {bill_id} processing failed: judge decision was FAIL_BILL")
+        else:
+            # If the judge's decision was not recognized
+            status = "failed"
+            logger.info(f"Bill {bill_id} processing failed: unrecognized next_step '{next_step}'")
         
         # Update the status in the final state
         final_state["status"] = status

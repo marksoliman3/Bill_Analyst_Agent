@@ -35,43 +35,91 @@ def consolidate_results(state: AgentState) -> AgentState:
     # Log the judgement for debugging
     logger.info(f"[CONSOLIDATOR] Judgement from state: {judgement}")
     
+    # Check if judgement is in the analyst-specific format
+    analyst_keys = ["market_structure", "product_safety", "property_rights", "societal_impact"]
+    if (
+        isinstance(judgement, dict) 
+        and any(key in judgement for key in analyst_keys) 
+        and "decision" not in judgement
+        and "next_step" not in judgement
+    ):
+        logger.warning(f"[CONSOLIDATOR] Judgement is in analyst-specific format: {judgement}")
+        # Convert to simplified schema
+        analysts_needing_revision = [
+            key for key, value in judgement.items() 
+            if key in analyst_keys and value in ["REVISION", "REVISE"]
+        ]
+        decision = "REVISE" if analysts_needing_revision else "AGREE"
+        next_step = "MULTI_ANALYST_REVISION" if analysts_needing_revision else "PASS_TO_FINALIZE"
+        judgement = {
+            "decision": decision,
+            "next_step": next_step,
+            "analysts_needing_revision": analysts_needing_revision,
+            "feedback_by_analyst": {}
+        }
+        logger.info(f"[CONSOLIDATOR] Converted judgement to simplified schema: {judgement}")
+    
     # Ensure judgement is a dictionary with the required fields
     if not judgement or not isinstance(judgement, dict):
         logger.warning(f"[CONSOLIDATOR] Judgement is not a dictionary or is empty: {judgement}")
         # Create a default judgement
         judgement = {
-            "decision": "UNKNOWN",
-            "feedback": None,
-            "next_step": "UNKNOWN"
+            "decision": "REVISE",
+            "next_step": "PASS_TO_FINALIZE",
+            "analysts_needing_revision": [],
+            "feedback_by_analyst": {}
         }
+    
+    # Ensure all required fields are present
+    if "decision" not in judgement:
+        judgement["decision"] = "REVISE"
+    if "next_step" not in judgement:
+        judgement["next_step"] = "PASS_TO_FINALIZE"
+    if "analysts_needing_revision" not in judgement:
+        judgement["analysts_needing_revision"] = []
+    if "feedback_by_analyst" not in judgement:
+        judgement["feedback_by_analyst"] = {}
+    
+    # Get multi-analyst revision information
+    analysts_needing_revision = state.get("analysts_needing_revision", [])
+    current_revision_analyst = state.get("current_revision_analyst")
+    
+    # Log multi-analyst revision information
+    if analysts_needing_revision:
+        logger.info(f"[CONSOLIDATOR] Analysts needing revision: {analysts_needing_revision}")
+    if current_revision_analyst:
+        logger.info(f"[CONSOLIDATOR] Current revision analyst: {current_revision_analyst}")
     
     consolidated = {
         "bill_extracts": state.get("bill_extracts"),
         "summary": state.get("summary"),
         "analyst_results": {},
         "judgement": judgement,
+        "multi_analyst_revision": {
+            "analysts_needing_revision": analysts_needing_revision,
+            "current_revision_analyst": current_revision_analyst
+        }
     }
 
     logger.info(f"[CONSOLIDATOR] Collecting outputs for bill {bill_id}")
 
-    # Use the analyst_results field if it exists
+    # Use the analyst_results field
     if "analyst_results" in state and isinstance(state["analyst_results"], dict):
-        # Add attempt counts to each analyst result
+        # Add attempt counts to each analyst result and standardize field names
         for analyst_key, result in state["analyst_results"].items():
             if isinstance(result, dict):
                 attempts = state.get("retry_attempts", {}).get(analyst_key, 1)
                 result_with_attempts = result.copy()
                 result_with_attempts["attempts"] = attempts
+                
+                # Standardize field names: ensure all analysts use the same field name for score
+                if "relevance_score" in result_with_attempts and "score" not in result_with_attempts:
+                    result_with_attempts["score"] = result_with_attempts.pop("relevance_score")
+                elif "score" in result_with_attempts and "relevance_score" not in result_with_attempts:
+                    # Already using the correct field name, no change needed
+                    pass
+                
                 consolidated["analyst_results"][analyst_key] = result_with_attempts
-    else:
-        # Fallback to the old method for backward compatibility
-        for k, v in state.items():
-            if k.endswith("_analysis") and isinstance(v, dict):
-                analyst_key = k.replace("_analysis", "")
-                attempts = state.get("retry_attempts", {}).get(analyst_key, 1)
-                v_with_attempts = v.copy()
-                v_with_attempts["attempts"] = attempts
-                consolidated["analyst_results"][analyst_key] = v_with_attempts
 
     state["consolidated_report"] = consolidated
     logger.info(f"[CONSOLIDATOR] Created consolidated report for bill {bill_id}")

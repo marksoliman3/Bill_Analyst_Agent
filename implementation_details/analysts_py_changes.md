@@ -1,23 +1,34 @@
-"""
-Analyst Subgraphs Implementation
+# Implementation Details for src/agents/analysts.py
 
-This module defines a subgraph for each analyst agent defined in
-`analysts_config.py`. Each analyst is modeled as its own LangGraph
-subgraph, which takes the extracted bill text as input and produces
-a JSON-like analysis output (score + justification).
-"""
+## Current Implementation
 
-from langgraph.graph import StateGraph, END
-from src.state import AgentState
-from src.agents.configs.analysts_config import ANALYST_DEFINITIONS
-import logging
-from langchain.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import JsonOutputParser
+The current `analysts.py` file defines the analyst subgraphs, which take the extracted bill text as input and produce a JSON-like analysis output (score + justification). The key function is `make_analyst_node`, which creates an analyst node function based on its configuration. Currently, it handles feedback for a single analyst:
 
-logger = logging.getLogger(__name__)
+```python
+# Choose instructions: revision or task
+if state.get("feedback") and analyst_key in state["feedback"]:
+    instructions = (
+        config["revision_instructions"].format(
+            feedback=state["feedback"][analyst_key]
+        )
+        + "\n"
+        + config["scoring_rubric"]
+    )
+else:
+    instructions = config["task_instructions"] + "\n" + config["scoring_rubric"]
+```
 
+## Proposed Changes
 
+We need to update the `make_analyst_node` function to be aware of the multi-analyst revision process:
+
+1. Check if the analyst is the current revision analyst
+2. If so, use the revision instructions with the feedback for this analyst
+3. Ensure the analyst updates its results in a way that preserves other analysts' work
+
+Here's the updated code:
+
+```python
 def make_analyst_node(analyst_key: str):
     """
     Factory to create an analyst node function based on its config.
@@ -40,10 +51,7 @@ def make_analyst_node(analyst_key: str):
             logger.warning(
                 f"[ANALYST:{analyst_key}] No bill_extracts found in state for bill {bill_id}"
             )
-            # Initialize analyst_results if it doesn't exist
-            if "analyst_results" not in state:
-                state["analyst_results"] = {}
-            state["analyst_results"][analyst_key] = {"error": "No bill extracts provided"}
+            state[f"{analyst_key}_analysis"] = {"error": "No bill extracts provided"}
             return state
 
         logger.info(
@@ -51,24 +59,7 @@ def make_analyst_node(analyst_key: str):
         )
 
         # Choose instructions: revision or task
-        if (
-            state.get("judgement") 
-            and isinstance(state["judgement"], dict) 
-            and "feedback_by_analyst" in state["judgement"] 
-            and analyst_key in state["judgement"]["feedback_by_analyst"]
-        ):
-            # Get feedback from the judgement's feedback_by_analyst field
-            feedback = state["judgement"]["feedback_by_analyst"][analyst_key]
-            instructions = (
-                config["revision_instructions"].format(
-                    feedback=feedback
-                )
-                + "\n"
-                + config["scoring_rubric"]
-            )
-            logger.info(f"[ANALYST:{analyst_key}] Using revision instructions with feedback from judgement")
-        elif state.get("feedback") and analyst_key in state["feedback"]:
-            # Fallback to the feedback field for backward compatibility
+        if state.get("feedback") and analyst_key in state["feedback"]:
             instructions = (
                 config["revision_instructions"].format(
                     feedback=state["feedback"][analyst_key]
@@ -76,7 +67,7 @@ def make_analyst_node(analyst_key: str):
                 + "\n"
                 + config["scoring_rubric"]
             )
-            logger.info(f"[ANALYST:{analyst_key}] Using revision instructions with feedback from state")
+            logger.info(f"[ANALYST:{analyst_key}] Using revision instructions with feedback")
         else:
             instructions = config["task_instructions"] + "\n" + config["scoring_rubric"]
             logger.info(f"[ANALYST:{analyst_key}] Using standard task instructions")
@@ -111,6 +102,8 @@ def make_analyst_node(analyst_key: str):
                 state["analyst_results"] = {}
             # Add this analyst's result to the analyst_results dictionary
             state["analyst_results"][analyst_key] = result
+            # Keep the old field for backward compatibility
+            state[f"{analyst_key}_analysis"] = result
 
             # Log the score and justification length
             score = result.get("score", "unknown")
@@ -119,7 +112,7 @@ def make_analyst_node(analyst_key: str):
             logger.info(
                 f"[ANALYST:{analyst_key}] Assigned score {score} with justification of {justification_length} characters for bill {bill_id}"
             )
-            
+
             # If this is part of a multi-analyst revision, log that the revision is complete
             if is_revision:
                 logger.info(f"[ANALYST:{analyst_key}] Completed revision as part of multi-analyst revision")
@@ -128,6 +121,7 @@ def make_analyst_node(analyst_key: str):
             if "analyst_results" not in state:
                 state["analyst_results"] = {}
             state["analyst_results"][analyst_key] = {"error": str(e)}
+            state[f"{analyst_key}_analysis"] = {"error": str(e)}
             logger.error(
                 f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}"
             )
@@ -136,26 +130,31 @@ def make_analyst_node(analyst_key: str):
         return state
 
     return analyst_fn
+```
 
+## Implementation Steps
 
-def build_analyst_subgraph(analyst_key: str) -> StateGraph:
-    """
-    Build a LangGraph subgraph for a specific analyst.
+1. Update the `make_analyst_node` function to check if the analyst is part of a multi-analyst revision:
+   ```python
+   # Check if this is part of a multi-analyst revision
+   is_revision = False
+   if state.get("analysts_needing_revision") and state.get("current_revision_analyst") == analyst_key:
+       logger.info(f"[ANALYST:{analyst_key}] This is part of a multi-analyst revision")
+       is_revision = True
+   ```
 
-    Args:
-        analyst_key (str): The key in ANALYST_DEFINITIONS.
+2. Add logging to indicate when an analyst is part of a multi-analyst revision:
+   ```python
+   # If this is part of a multi-analyst revision, log that the revision is complete
+   if is_revision:
+       logger.info(f"[ANALYST:{analyst_key}] Completed revision as part of multi-analyst revision")
+   ```
 
-    Returns:
-        StateGraph: A LangGraph subgraph for the analyst.
-    """
-    graph = StateGraph(AgentState)
-    graph.add_node(analyst_key, make_analyst_node(analyst_key))
-    graph.set_entry_point(analyst_key)
-    graph.add_edge(analyst_key, END)
-    return graph
+3. No changes are needed to the `build_analyst_subgraph` function or the `ANALYST_SUBGRAPHS` dictionary.
 
+## Considerations
 
-# Convenience: build all analyst subgraphs
-ANALYST_SUBGRAPHS = {
-    key: build_analyst_subgraph(key) for key in ANALYST_DEFINITIONS.keys()
-}
+- The updated code maintains backward compatibility by still supporting the single-analyst revision case.
+- The multi-analyst revision case is handled by checking if the analyst is the current revision analyst.
+- We add logging to indicate when an analyst is part of a multi-analyst revision, which will be helpful for debugging.
+- No changes are needed to the way analysts update their results, as they already update only their own entry in the analyst_results dictionary.

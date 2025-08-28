@@ -1,7 +1,7 @@
-from typing import TypedDict, List, Optional, Dict, Any
+from typing import TypedDict, List, Optional, Dict, Any, Literal
 from typing_extensions import Annotated
 from langgraph.graph import add_messages
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AgentState(TypedDict, total=False):
@@ -23,13 +23,15 @@ class AgentState(TypedDict, total=False):
     ]  # Removed add_messages annotation to prevent message conversion
 
     # Judge outputs
-    judgement: Optional[Dict[str, Any]]  # Contains decision, feedback, and next_step
-    judge_feedback: Optional[str]  # For backward compatibility
+    judgement: Optional[Dict[str, Any]]  # Contains decision, next_step, analysts_needing_revision, and feedback_by_analyst
     feedback: Optional[Dict[str, str]]  # keyed by analyst_id
-    next_step: Optional[str]  # For backward compatibility
 
     # Retry tracking
     retry_attempts: Dict[str, int]  # track retries per analyst
+
+    # Multi-analyst revision tracking
+    analysts_needing_revision: Optional[List[str]]  # List of analyst IDs that need revision
+    current_revision_analyst: Optional[str]  # Current analyst being processed in a revision cycle
 
     # Consolidator output
     consolidated_report: Optional[Dict[str, Any]]
@@ -52,5 +54,24 @@ class AnalystOutput(BaseModel):
     attempts: int
 
 
+# Add a nested model for the judgement content
+class JudgementContent(BaseModel):
+    decision: Literal["AGREE", "REVISE"] = Field(
+        description="The overall decision, either 'AGREE' or 'REVISE'"
+    )
+    next_step: Literal["MULTI_ANALYST_REVISION", "PASS_TO_FINALIZE", "FAIL_BILL"] = Field(
+        description="The next step in the workflow"
+    )
+    analysts_needing_revision: List[str] = Field(
+        default=[],
+        description="List of analyst names that need revision (only if next_step is 'MULTI_ANALYST_REVISION')"
+    )
+    feedback_by_analyst: Dict[str, str] = Field(
+        default={},
+        description="Dictionary mapping analyst names to feedback strings (only for analysts needing revision)"
+    )
+
 class JudgeOutput(BaseModel):
-    judgement: Dict[str, Any]  # Contains decision, feedback, and next_step
+    judgement: JudgementContent = Field(
+        description="The judge's decision, including overall decision, next step, and feedback"
+    )
