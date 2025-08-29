@@ -31,7 +31,7 @@ class AgentState(TypedDict, total=False):
 
     # Multi-analyst revision tracking
     analysts_needing_revision: Optional[List[str]]  # List of analyst IDs that need revision
-    current_revision_analyst: Optional[str]  # Current analyst being processed in a revision cycle
+    processed_analysts: Optional[List[str]]  # List of analyst IDs that have been processed in the current revision cycle
 
     # Consolidator output
     consolidated_report: Optional[Dict[str, Any]]

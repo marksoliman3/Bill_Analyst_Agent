@@ -35,7 +35,7 @@ def main():
             "status": "processing",
             "analyst_results": {},  # Initialize analyst_results as an empty dict
             "analysts_needing_revision": [],  # Initialize analysts_needing_revision as an empty list
-            "current_revision_analyst": None,  # Initialize current_revision_analyst as None
+            "processed_analysts": [],  # Initialize processed_analysts as an empty list to track which analysts have been processed in a revision cycle
         }
 
         # Run the full orchestrated graph

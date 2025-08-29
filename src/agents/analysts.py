@@ -31,7 +31,8 @@ def make_analyst_node(analyst_key: str):
 
         # Check if this is part of a multi-analyst revision
         is_revision = False
-        if state.get("analysts_needing_revision") and state.get("current_revision_analyst") == analyst_key:
+        analysts_needing_revision = state.get("analysts_needing_revision", [])
+        if analysts_needing_revision and analyst_key in analysts_needing_revision:
             logger.info(f"[ANALYST:{analyst_key}] This is part of a multi-analyst revision")
             is_revision = True
 

@@ -118,6 +118,10 @@ def judge_analysis(state: AgentState) -> AgentState:
             # Store the list in state (create a new list to avoid mutations)
             updated_state["analysts_needing_revision"] = analysts_needing_revision.copy()
             
+            # Reset the processed_analysts list for the new revision cycle
+            updated_state["processed_analysts"] = []
+            logger.info(f"[JUDGE] Reset processed_analysts list for new revision cycle")
+            
             # Get feedback for each analyst
             feedback_by_analyst = judgement["feedback_by_analyst"]
             
@@ -158,9 +162,6 @@ def judge_analysis(state: AgentState) -> AgentState:
             else:
                 # Otherwise, update the filtered list
                 updated_state["analysts_needing_revision"] = filtered_analysts
-            
-            # Set the current_revision_analyst to None (will be set by revision_router)
-            updated_state["current_revision_analyst"] = None
             
     except Exception as e:
         logger.error(f"[JUDGE] Failed for bill {bill_id}: {e}")
