@@ -6,6 +6,8 @@ Each agent is defined as a dictionary containing its name, a detailed persona
 for prompting, its specific task instructions, and the expected output schema.
 """
 
+from src.agents.configs.analysts_config import SCORING_RUBRIC
+
 OTHER_AGENTS_DEFINITIONS = {
     "extractor": {
         "name": "Relevance Extractor Agent",
@@ -71,6 +73,8 @@ OTHER_AGENTS_DEFINITIONS = {
             "relevance score. If you agree with the score but think the justification could be improved, "
             "you MUST mark it as 'AGREE' and let it pass through. DO NOT provide feedback about improving "
             "justifications - focus EXCLUSIVELY on whether the numeric scores are correct.\n\n"
+            "When evaluating analyst scores, use the following scoring rubric:\n"
+            + SCORING_RUBRIC + "\n\n"
             "Your output MUST follow this exact structure:\n"
             "{{\n"
             "  \"judgement\": {{\n"
