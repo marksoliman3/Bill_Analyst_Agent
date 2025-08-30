@@ -125,17 +125,19 @@ def judge_analysis(state: AgentState) -> AgentState:
             # Get feedback for each analyst
             feedback_by_analyst = judgement["feedback_by_analyst"]
             
-            # Initialize feedback dictionary
-            updated_feedback = state.get("feedback", {}).copy() if state.get("feedback") else {}
+            # Add temporary logging for debugging the feedback mechanism
+            logger.info(f"[JUDGE] [DEBUG] Feedback by analyst from judgement: {feedback_by_analyst}")
+            
+            # Only update retry attempts, not feedback (using single source of truth)
             updated_retry_attempts = state.get("retry_attempts", {}).copy() if state.get("retry_attempts") else {}
             
             # Process each analyst needing revision
             filtered_analysts = []
             
             for analyst in analysts_needing_revision:
-                # Store feedback
+                # Add temporary logging for each analyst's feedback
                 if analyst in feedback_by_analyst:
-                    updated_feedback[analyst] = feedback_by_analyst[analyst]
+                    logger.info(f"[JUDGE] [DEBUG] Feedback for {analyst}: {feedback_by_analyst[analyst]}")
                 
                 # Update retry attempts
                 current_attempts = updated_retry_attempts.get(analyst, 0) + 1
@@ -147,9 +149,9 @@ def judge_analysis(state: AgentState) -> AgentState:
                 else:
                     logger.info(f"[JUDGE] Max retries reached for {analyst}. Removing from revision list.")
             
-            # Update state with feedback and retry attempts
-            updated_state["feedback"] = updated_feedback
+            # Update state with retry attempts only (no feedback - using single source of truth)
             updated_state["retry_attempts"] = updated_retry_attempts
+            logger.info(f"[JUDGE] [DEBUG] Using judgement's feedback_by_analyst as single source of truth")
             
             # If all analysts have reached max retries, pass to finalize
             if not filtered_analysts:

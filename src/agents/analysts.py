@@ -58,8 +58,11 @@ def make_analyst_node(analyst_key: str):
             and "feedback_by_analyst" in state["judgement"] 
             and analyst_key in state["judgement"]["feedback_by_analyst"]
         ):
-            # Get feedback from the judgement's feedback_by_analyst field
+            # Get feedback from the judgement's feedback_by_analyst field (single source of truth)
             feedback = state["judgement"]["feedback_by_analyst"][analyst_key]
+            # Add temporary logging for debugging
+            logger.info(f"[ANALYST:{analyst_key}] [DEBUG] Found feedback in judgement's feedback_by_analyst: {feedback}")
+            
             instructions = (
                 config["revision_instructions"].format(
                     feedback=feedback
@@ -68,17 +71,12 @@ def make_analyst_node(analyst_key: str):
                 + config["scoring_rubric"]
             )
             logger.info(f"[ANALYST:{analyst_key}] Using revision instructions with feedback from judgement")
-        elif state.get("feedback") and analyst_key in state["feedback"]:
-            # Fallback to the feedback field for backward compatibility
-            instructions = (
-                config["revision_instructions"].format(
-                    feedback=state["feedback"][analyst_key]
-                )
-                + "\n"
-                + config["scoring_rubric"]
-            )
-            logger.info(f"[ANALYST:{analyst_key}] Using revision instructions with feedback from state")
         else:
+            # No feedback found in the single source of truth
+            if state.get("feedback") and analyst_key in state["feedback"]:
+                # Add temporary logging to show we're ignoring the old feedback field
+                logger.info(f"[ANALYST:{analyst_key}] [DEBUG] Ignoring deprecated feedback in state.feedback")
+                
             instructions = config["task_instructions"] + "\n" + config["scoring_rubric"]
             logger.info(f"[ANALYST:{analyst_key}] Using standard task instructions")
 

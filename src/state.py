@@ -24,7 +24,7 @@ class AgentState(TypedDict, total=False):
 
     # Judge outputs
     judgement: Optional[Dict[str, Any]]  # Contains decision, next_step, analysts_needing_revision, and feedback_by_analyst
-    feedback: Optional[Dict[str, str]]  # keyed by analyst_id
+    feedback: Optional[Dict[str, str]]  # DEPRECATED: Use judgement's feedback_by_analyst field instead (kept for backward compatibility)
 
     # Retry tracking
     retry_attempts: Dict[str, int]  # track retries per analyst
