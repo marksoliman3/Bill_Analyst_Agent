@@ -48,8 +48,13 @@ class ExtractOutput(BaseModel):
     bill_extracts: str
 
 
+class SubscoresOutput(BaseModel):
+    substantive_regulation: int
+    institutional_framework: int
+
 class AnalystOutput(BaseModel):
     score: int
+    subscores: SubscoresOutput
     justification: str
     attempts: int
 

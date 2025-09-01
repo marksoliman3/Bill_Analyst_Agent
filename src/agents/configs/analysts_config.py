@@ -24,6 +24,10 @@ SCORING_RUBRIC = """
 # This helps enforce a consistent output format using an output parser.
 OUTPUT_SCHEMA = {
     "score": "integer",
+    "subscores": {
+        "substantive_regulation": "integer",
+        "institutional_framework": "integer"
+    },
     "justification": "string",
 }
 
@@ -45,21 +49,38 @@ ANALYST_DEFINITIONS = {
             "Ignore all other aspects of the bill."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score. "
+            "Based on the provided bill extracts, you must determine a relevance score and two subscores. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign a score. "
+            "Additionally, evaluate two specific aspects using the same 0-3 rubric:\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
             "Finally, provide a brief but clear justification for your score, citing "
-            "specific elements from the text. Your output must be a valid JSON object."
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
+            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Additionally, still evaluate the two specific aspects using the same 0-3 rubric (though these are not considered by the judge):\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations.\n"
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
-            "Your output must be a valid JSON object."
+            "Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Market Structure & Competition",
         "scoring_rubric": SCORING_RUBRIC,
@@ -81,21 +102,38 @@ ANALYST_DEFINITIONS = {
             "and auditing mechanisms. Do not consider economic or property rights issues."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score. "
+            "Based on the provided bill extracts, you must determine a relevance score and two subscores. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign a score. "
+            "Additionally, evaluate two specific aspects using the same 0-3 rubric:\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
             "Finally, provide a brief but clear justification for your score, citing "
-            "specific elements from the text. Your output must be a valid JSON object."
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
+            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score. "
-            "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
-            "Your output must be a valid JSON object."
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Additionally, still evaluate two specific aspects using the same 0-3 rubric (though these are not considered by the judge):\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
+            "Finally, provide a brief but clear justification for your score, citing "
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Product Safety, Reliability, & Accountability",
         "scoring_rubric": SCORING_RUBRIC,
@@ -116,21 +154,38 @@ ANALYST_DEFINITIONS = {
             "Disregard topics like market competition or societal impact."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score. "
+            "Based on the provided bill extracts, you must determine a relevance score and two subscores. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign a score. "
+            "Additionally, evaluate two specific aspects using the same 0-3 rubric:\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
             "Finally, provide a brief but clear justification for your score, citing "
-            "specific elements from the text. Your output must be a valid JSON object."
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
+            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score. "
-            "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
-            "Your output must be a valid JSON object."
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Additionally, still evaluate two specific aspects using the same 0-3 rubric (though these are not considered by the judge):\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
+            "Finally, provide a brief but clear justification for your score, citing "
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Property Rights & Attribution",
         "scoring_rubric": SCORING_RUBRIC,
@@ -152,21 +207,38 @@ ANALYST_DEFINITIONS = {
             "social equity considerations. Do not analyze technical safety or market structure."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score. "
+            "Based on the provided bill extracts, you must determine a relevance score and two subscores. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign a score. "
+            "Additionally, evaluate two specific aspects using the same 0-3 rubric:\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
             "Finally, provide a brief but clear justification for your score, citing "
-            "specific elements from the text. Your output must be a valid JSON object."
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
+            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score. "
-            "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
-            "Your output must be a valid JSON object."
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Additionally, still evaluate two specific aspects using the same 0-3 rubric (though these are not considered by the judge):\n"
+            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
+            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated.\n"
+            "- institutional_framework: Establishment of agencies, processes, and governance structures "
+            "that are empowered to develop, implement, and enforce AI regulations over time.\n"
+            "Finally, provide a brief but clear justification for your score, citing "
+            "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
+            "- score: An integer from 0-3\n"
+            "- subscores: An object with two fields: substantive_regulation and institutional_framework, each an integer from 0-3\n"
+            "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Societal Impact & Governance",
         "scoring_rubric": SCORING_RUBRIC,

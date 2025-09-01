@@ -119,6 +119,15 @@ def consolidate_results(state: AgentState) -> AgentState:
                     # Already using the correct field name, no change needed
                     pass
                 
+                # Ensure subscores are included
+                if "subscores" not in result_with_attempts and "score" in result_with_attempts:
+                    # Handle legacy results without subscores
+                    logger.info(f"[CONSOLIDATOR] Adding default subscores for analyst {analyst_key}")
+                    result_with_attempts["subscores"] = {
+                        "substantive_regulation": 0,
+                        "institutional_framework": 0
+                    }
+                
                 consolidated["analyst_results"][analyst_key] = result_with_attempts
 
     state["consolidated_report"] = consolidated

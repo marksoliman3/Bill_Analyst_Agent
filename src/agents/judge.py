@@ -157,8 +157,10 @@ def judge_analysis(state: AgentState) -> AgentState:
             if not filtered_analysts:
                 logger.info("[JUDGE] All analysts have reached max retries. Passing to finalize.")
                 updated_judgement = judgement.copy()
+                updated_judgement["decision"] = "AGREE"  # Change decision to AGREE to be consistent
                 updated_judgement["next_step"] = "PASS_TO_FINALIZE"
                 updated_judgement["analysts_needing_revision"] = []
+                updated_judgement["feedback_by_analyst"] = {}  # Clear feedback since we're not revising
                 updated_state["judgement"] = updated_judgement
                 updated_state["analysts_needing_revision"] = []
             else:
