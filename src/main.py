@@ -130,7 +130,15 @@ def main():
     # Convert results to DataFrame and save
     logger.info(f"Processed {len(results)} bills, saving results to {OUTPUT_CSV_PATH}")
     results_df = pd.DataFrame(results)
-    write_analysis_results(OUTPUT_CSV_PATH, results_df)
+    
+    # Filter columns to include only the specified ones
+    columns_to_keep = ['bill_id', 'bill_text', 'bill_extracts', 'summary', 'analyst_results', 'retry_attempts', 'status']
+    # Only keep columns that exist in the DataFrame
+    existing_columns = [col for col in columns_to_keep if col in results_df.columns]
+    filtered_df = results_df[existing_columns]
+    
+    logger.info(f"Filtered DataFrame to include only columns: {existing_columns}")
+    write_analysis_results(OUTPUT_CSV_PATH, filtered_df)
     logger.info("Bill analysis application completed successfully")
 
 
