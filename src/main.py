@@ -18,10 +18,15 @@ def main():
 
     # Initialize results list
     results = []
+    # Keep track of original bill data
+    original_bill_data = []
 
     for index, bill in bills_df.iterrows():
         bill_id = bill["Bill_Number"] if "Bill_Number" in bill else f"Bill-{index}"
         logger.info(f"Processing bill {bill_id} ({index+1}/{len(bills_df)})")
+
+        # Store original bill data
+        original_bill_data.append(bill.to_dict())
 
         # Create a properly structured state dictionary
         state = {
@@ -127,18 +132,36 @@ def main():
         
         results.append(final_state)
 
-    # Convert results to DataFrame and save
-    logger.info(f"Processed {len(results)} bills, saving results to {OUTPUT_CSV_PATH}")
+    # Convert results to DataFrame
+    logger.info(f"Processed {len(results)} bills, preparing results for output")
     results_df = pd.DataFrame(results)
     
-    # Filter columns to include only the specified ones
-    columns_to_keep = ['bill_id', 'bill_text', 'bill_extracts', 'summary', 'analyst_results', 'retry_attempts', 'status']
-    # Only keep columns that exist in the DataFrame
-    existing_columns = [col for col in columns_to_keep if col in results_df.columns]
-    filtered_df = results_df[existing_columns]
+    # Create DataFrame from original bill data
+    original_df = pd.DataFrame(original_bill_data)
     
-    logger.info(f"Filtered DataFrame to include only columns: {existing_columns}")
-    write_analysis_results(OUTPUT_CSV_PATH, filtered_df)
+    # Ensure bill_id is present in both DataFrames for merging
+    if 'bill_id' not in results_df.columns and 'Bill_Number' in original_df.columns:
+        results_df['bill_id'] = original_df['Bill_Number']
+    
+    # Columns to keep from the results DataFrame
+    analysis_columns = ['bill_extracts', 'summary', 'analyst_results', 'retry_attempts', 'status']
+    # Only keep columns that exist in the results DataFrame
+    existing_analysis_columns = [col for col in analysis_columns if col in results_df.columns]
+    
+    # Create a new DataFrame with all original columns plus analysis columns
+    merged_df = pd.DataFrame()
+    
+    # Add all original columns
+    for col in original_df.columns:
+        merged_df[col] = original_df[col]
+    
+    # Add analysis columns
+    for col in existing_analysis_columns:
+        if col in results_df.columns:
+            merged_df[col] = results_df[col]
+    
+    logger.info(f"Final DataFrame includes original columns plus: {existing_analysis_columns}")
+    write_analysis_results(OUTPUT_CSV_PATH, merged_df)
     logger.info("Bill analysis application completed successfully")
 
 

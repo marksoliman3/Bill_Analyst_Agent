@@ -93,7 +93,7 @@ The system is designed as a "Graph of Graphs" where each specialized agent opera
 
 2. Run the application
    ```bash
-   python src/main.py
+   python -m src.main
    ```
 
 3. Find your results in the `data` directory as `output_analysis.csv`
