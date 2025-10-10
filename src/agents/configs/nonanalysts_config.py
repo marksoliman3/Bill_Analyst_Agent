@@ -26,9 +26,17 @@ OTHER_AGENTS_DEFINITIONS = {
             "- Property Rights & Attribution (e.g., copyright, training data compensation)\n"
             "- Societal Impact & Public Interest (e.g., labor impacts, equity considerations)\n"
             "- Governance Frameworks & Institutional Processes (e.g., oversight bodies, enforcement)\n\n"
-            "Your task is to extract only the sections, sentences, or paragraphs from the bill that are "
-            "directly relevant to ANY of these dimensions. Consolidate all extracted text "
-            "into a single, coherent block of text. Do not summarize or paraphrase."
+            "Your task is to extract relevant content from the bill with sufficient context for proper analysis:\n\n"
+            "1. EXTRACT WHOLE SECTIONS: When you identify relevant content, extract the entire section or paragraph "
+            "containing it, not just the specific sentences mentioning key terms.\n\n"
+            "2. INCLUDE SURROUNDING CONTEXT: For each relevant section, also include the paragraph before and after "
+            "to provide proper context. This ensures analysts have sufficient information to understand the intent.\n\n"
+            "3. ERR ON THE SIDE OF INCLUSION: When in doubt about relevance, include the content rather than exclude it. "
+            "It's better to provide slightly more context than too little.\n\n"
+            "4. MAINTAIN STRUCTURAL INTEGRITY: Preserve section numbering, headings, and the logical structure of "
+            "extracted content to help analysts understand how provisions relate to each other.\n\n"
+            "Consolidate all extracted text into a single, coherent block of text. Do not summarize or paraphrase. "
+            "Your goal is to provide comprehensive context while focusing on content relevant to the six dimensions."
         ),
         "output_schema": {
             "bill_extracts": "string",
