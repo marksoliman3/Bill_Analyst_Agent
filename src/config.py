@@ -15,7 +15,7 @@ INPUT_CSV_PATH = "data/input/bills.csv"
 OUTPUT_CSV_PATH = "data/output/analysis_results.csv"
 
 # Retry settings
-MAX_RETRY_ATTEMPTS = 3
+MAX_RETRY_ATTEMPTS = 1
 
 # Logging settings
 import logging

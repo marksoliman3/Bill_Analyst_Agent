@@ -1,6 +1,7 @@
 # 📊 Bill Analyst: AI-Powered Legislative Analysis
 
-![Bill Analyst Banner](https://img.shields.io/badge/Bill%20Analyst-Intelligent%20Legislative%20Analysis-blue)
+# Multi-Agent Architecture Codebase: 
+https://github.com/marksoliman3/Bill_Analyst_Agent/tree/main
 
 ## 🔍 What is Bill Analyst?
 
@@ -108,7 +109,7 @@ Your input CSV should contain at minimum these columns:
 
 For each bill, Bill Analyst produces:
 - A concise 5-sentence summary in plain language
-- Scores (0-3) across four key dimensions
+- Scores (0-2) across four key dimensions
 - Detailed justifications for each score
 - Processing status and metadata
 

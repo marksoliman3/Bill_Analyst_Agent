@@ -14,8 +14,68 @@ import logging
 from langchain.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
+from typing import Any, Dict, Callable
+import json
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_for_json(text: str) -> str:
+    """
+    Sanitize the text to ensure it can be properly parsed as JSON.
+    Escapes apostrophes and other problematic characters.
+    
+    Args:
+        text (str): The text to sanitize
+        
+    Returns:
+        str: Sanitized text that can be safely parsed as JSON
+    """
+    # Handle apostrophes in strings
+    text = text.replace("'", "\\'")
+    # Handle other potentially problematic characters
+    text = text.replace('\n', '\\n')
+    text = text.replace('\r', '\\r')
+    text = text.replace('\t', '\\t')
+    # Log that we're sanitizing the text
+    logger.debug(f"Sanitized text for JSON parsing: {text[:100]}...")
+    return text
+
+
+class SanitizedJsonOutputParser(JsonOutputParser):
+    """
+    A JSON output parser that sanitizes the text before parsing.
+    """
+    
+    def parse(self, text: str) -> Dict[str, Any]:
+        """
+        Parse the text into a JSON object, sanitizing it first.
+        
+        Args:
+            text (str): The text to parse
+            
+        Returns:
+            Dict[str, Any]: The parsed JSON object
+        """
+        sanitized_text = sanitize_for_json(text)
+        try:
+            return super().parse(sanitized_text)
+        except Exception as e:
+            logger.warning(f"JSON parsing failed even after sanitization: {e}")
+            # If parsing still fails, try a more direct approach with json.loads
+            try:
+                # Find JSON-like content using a simple heuristic
+                start_idx = text.find('{')
+                end_idx = text.rfind('}')
+                if start_idx != -1 and end_idx != -1:
+                    json_text = text[start_idx:end_idx+1]
+                    sanitized_json = sanitize_for_json(json_text)
+                    return json.loads(sanitized_json)
+                else:
+                    raise ValueError("Could not find JSON-like content")
+            except Exception as inner_e:
+                logger.error(f"All JSON parsing attempts failed: {inner_e}")
+                raise e  # Re-raise the original exception
 
 
 def make_analyst_node(analyst_key: str):
@@ -91,8 +151,8 @@ def make_analyst_node(analyst_key: str):
             ]
         )
 
-        # Define parser
-        parser = JsonOutputParser()
+        # Define parser with sanitization
+        parser = SanitizedJsonOutputParser()
 
         # Build chain
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
