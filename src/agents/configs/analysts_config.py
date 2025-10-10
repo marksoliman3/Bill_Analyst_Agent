@@ -23,10 +23,6 @@ SCORING_RUBRIC = """
 # This helps enforce a consistent output format using an output parser.
 OUTPUT_SCHEMA = {
     "score": "integer",
-    "subscores": {
-        "substantive_regulation": "integer",
-        "institutional_framework": "integer"
-    },
     "justification": "string",
 }
 
@@ -48,41 +44,24 @@ ANALYST_DEFINITIONS = {
             "Ignore all other aspects of the bill."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score and identify the primary regulatory approach. "
+            "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an overall score from 0-2. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations over time. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
-            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Market Structure & Competition",
@@ -105,41 +84,24 @@ ANALYST_DEFINITIONS = {
             "and auditing mechanisms. Do not consider economic or property rights issues."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score and identify the primary regulatory approach. "
+            "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an overall score from 0-2. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations over time. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
-            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Product Safety, Reliability, & Accountability",
@@ -161,41 +123,24 @@ ANALYST_DEFINITIONS = {
             "Disregard topics like market competition or societal impact."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score and identify the primary regulatory approach. "
+            "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an overall score from 0-2. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations over time. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
-            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Property Rights & Attribution",
@@ -218,41 +163,24 @@ ANALYST_DEFINITIONS = {
             "social equity considerations. Do not analyze technical safety or market structure."
         ),
         "task_instructions": (
-            "Based on the provided bill extracts, you must determine a relevance score and identify the primary regulatory approach. "
+            "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an overall score from 0-2. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users, covering how AI systems must be developed, deployed, or operated. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations over time. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
             "Your previous analysis was reviewed and requires revision. "
             "**Carefully consider the following feedback from the judge: '{feedback}'.** "
-            "This feedback is based solely on your overall score, not on any subscores. "
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
             "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
-            "Next, you must determine which regulatory approach is PRIMARILY used in the bill: "
-            "- Choose EITHER substantive_regulation OR institutional_framework as the primary approach, NOT BOTH. "
-            "- Assign a score (1-2) ONLY to your chosen approach, and assign 0 to the other approach. "
-            "- substantive_regulation: Direct rules and requirements that create immediate and specific "
-            "legal obligations for AI producers and users. "
-            "- institutional_framework: Establishment of agencies, processes, and governance structures "
-            "that are empowered to develop, implement, and enforce AI regulations. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
             "- score: An integer from 0-2\n"
-            "- subscores: An object with two fields: substantive_regulation and institutional_framework, where EXACTLY ONE field has a non-zero value (1-2) and the other MUST be 0\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Societal Impact & Governance",
