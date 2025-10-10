@@ -36,7 +36,7 @@ def consolidate_results(state: AgentState) -> AgentState:
     logger.info(f"[CONSOLIDATOR] Judgement from state: {judgement}")
     
     # Check if judgement is in the analyst-specific format
-    analyst_keys = ["market_structure", "product_safety", "property_rights", "societal_impact"]
+    analyst_keys = ["market_structure", "product_safety", "ai_use_transparency", "property_rights", "societal_impact", "governance_frameworks"]
     if (
         isinstance(judgement, dict) 
         and any(key in judgement for key in analyst_keys) 

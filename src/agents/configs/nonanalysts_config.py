@@ -19,9 +19,15 @@ OTHER_AGENTS_DEFINITIONS = {
         ),
         "task_instructions": (
             "You will be provided with the full text of a legislative bill and a "
-            "detailed list of analytical scopes. Your task is to extract only the "
-            "sections, sentences, or paragraphs from the bill that are directly "
-            "relevant to ANY of the provided scopes. Consolidate all extracted text "
+            "detailed list of analytical scopes covering six key dimensions of AI legislation:\n"
+            "- Market Structure & Competition (e.g., competition rules, interoperability)\n"
+            "- Product Safety, Reliability & Accountability (e.g., testing standards, security)\n" 
+            "- AI Use, Transparency & Disclosure (e.g., consent requirements, synthetic content)\n"
+            "- Property Rights & Attribution (e.g., copyright, training data compensation)\n"
+            "- Societal Impact & Public Interest (e.g., labor impacts, equity considerations)\n"
+            "- Governance Frameworks & Institutional Processes (e.g., oversight bodies, enforcement)\n\n"
+            "Your task is to extract only the sections, sentences, or paragraphs from the bill that are "
+            "directly relevant to ANY of these dimensions. Consolidate all extracted text "
             "into a single, coherent block of text. Do not summarize or paraphrase."
         ),
         "output_schema": {
@@ -56,7 +62,13 @@ OTHER_AGENTS_DEFINITIONS = {
         "task_instructions": (
             "You will be given the extracted text of a bill and the outputs from multiple analysts, "
             "each with their own scope, score, and justification. You will also be told how many times "
-            "each analyst has attempted this task. "
+            "each analyst has attempted this task. The six analyst categories are:\n"
+            "- Market Structure & Competition: Analyzes aspects related to fair competition in the AI ecosystem\n"
+            "- Product Safety, Reliability, & Accountability: Evaluates safety measures, reliability standards, and accountability mechanisms\n"
+            "- AI Use, Transparency & Disclosure: Examines regulations on AI deployment, transparency requirements, and disclosure standards\n"
+            "- Property Rights & Attribution: Focuses on intellectual property, data rights, and attribution mechanisms\n"
+            "- Societal Impact & Public Interest: Assesses broader societal implications like labor impacts, environmental concerns, and equity\n"
+            "- Governance Frameworks & Institutional Processes: Evaluates oversight mechanisms, regulatory frameworks, and enforcement processes\n\n"
             "Your task is to perform the following steps:\n"
             "1. Compare each analyst's work against the bill text, their assigned scope, and the rubric.\n"
             "2. For each analyst, decide if you 'AGREE' or if it requires 'REVISION' based SOLELY on their main numeric score (0-2).\n"
@@ -67,7 +79,7 @@ OTHER_AGENTS_DEFINITIONS = {
             "   - If decision is 'AGREE', set next_step to 'PASS_TO_FINALIZE'.\n"
             "   - If decision is 'REVISE' and any analysts need revision, set next_step to 'MULTI_ANALYST_REVISION' and list all analysts needing revision in the 'analysts_needing_revision' field.\n"
             "   - If any analyst has failed their final attempt, set next_step to 'FAIL_BILL'.\n"
-            "5. For each analyst requiring revision, provide specific feedback in the 'feedback_by_analyst' dictionary, keyed by analyst name. This feedback must ONLY be about the main numeric score, not about justifications or subscores.\n\n"
+            "5. For each analyst requiring revision, provide specific feedback in the 'feedback_by_analyst' dictionary, keyed by analyst name. This feedback must ONLY be about the main numeric score, not about justifications.\n\n"
             "CRITICAL INSTRUCTION - FOCUS EXCLUSIVELY ON MAIN NUMERIC SCORES: Your primary task is to judge ONLY the main numeric relevance scores (0-2), "
             "NEVER the justifications. ONLY send a bill back to an analyst if you disagree with their "
             "main relevance score. If you agree with the main score but think the justification could be improved, "

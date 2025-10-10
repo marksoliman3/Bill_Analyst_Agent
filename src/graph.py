@@ -77,7 +77,7 @@ def build_full_graph() -> StateGraph:
             return "PASS_TO_FINALIZE"
         
         # Check if judgement is in the analyst-specific format
-        analyst_keys = ["market_structure", "product_safety", "property_rights", "societal_impact"]
+        analyst_keys = ["market_structure", "product_safety", "ai_use_transparency", "property_rights", "societal_impact", "governance_frameworks"]
         if (
             any(key in judgement for key in analyst_keys) 
             and "decision" not in judgement
