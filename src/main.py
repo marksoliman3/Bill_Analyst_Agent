@@ -160,7 +160,64 @@ def main():
         if col in results_df.columns:
             merged_df[col] = results_df[col]
     
-    logger.info(f"Final DataFrame includes original columns plus: {existing_analysis_columns}")
+    # Helper function to safely extract scores
+    def extract_score(analyst_results, key):
+        """
+        Safely extract a score from analyst results with robust error handling.
+        
+        Args:
+            analyst_results: The dictionary of analyst results
+            key: The analyst key to extract score for
+            
+        Returns:
+            int or None: The extracted score, or None if not available
+        """
+        try:
+            # Check if analyst_results is a dictionary and contains the key
+            if not isinstance(analyst_results, dict):
+                return None
+                
+            # Get the analyst's result
+            analyst_result = analyst_results.get(key, {})
+            if not isinstance(analyst_result, dict):
+                return None
+                
+            # Extract and validate the score
+            score = analyst_result.get('score')
+            
+            # Ensure score is an integer
+            if score is not None:
+                try:
+                    return int(score)
+                except (ValueError, TypeError):
+                    # If score can't be converted to int, log and return None
+                    logger.warning(f"Non-integer score found for {key}: {score}")
+                    return None
+            return None
+        except Exception as e:
+            # Catch any unexpected errors during extraction
+            logger.error(f"Error extracting score for {key}: {e}")
+            return None
+    
+    # Extract individual scores from analyst_results
+    analyst_keys = ["market_structure", "product_safety", "ai_use_transparency", 
+                    "property_rights", "societal_impact", "governance_frameworks"]
+    score_columns = [f"{key}_score" for key in analyst_keys]
+    
+    # Create columns for individual scores
+    for i, key in enumerate(analyst_keys):
+        column_name = score_columns[i]
+        # Use the helper function to safely extract scores
+        merged_df[column_name] = merged_df.apply(
+            lambda row: extract_score(row.get('analyst_results'), key)
+            if 'analyst_results' in row else None, 
+            axis=1
+        )
+        
+        # Log the column creation
+        logger.info(f"Created {column_name} column with extraction from analyst_results")
+    
+    logger.info(f"Final DataFrame includes original columns plus: {existing_analysis_columns} and individual score columns")
     write_analysis_results(OUTPUT_CSV_PATH, merged_df)
     logger.info("Bill analysis application completed successfully")
 
