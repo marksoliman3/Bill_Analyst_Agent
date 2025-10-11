@@ -32,20 +32,28 @@ Our system identifies and extracts only the most relevant portions of bills, foc
 Complex legal language is transformed into concise, clear summaries that anyone can understand.
 
 ### 3. Multi-Dimensional Analysis
-Each bill is analyzed across four critical dimensions by specialized AI analysts:
+Each bill is analyzed across six critical dimensions by specialized AI analysts:
 
 | Dimension | What It Measures |
 |-----------|------------------|
 | 🏢 **Market Structure & Competition** | How the bill affects market dynamics, competition, and business operations |
 | 🛡️ **Product Safety & Accountability** | How the bill addresses safety standards, testing, and accountability measures |
+| 🔍 **AI Use, Transparency & Disclosure** | How the bill regulates AI deployment, requires transparency, and mandates disclosures |
 | 📜 **Property Rights & Attribution** | How the bill impacts intellectual property, data rights, and attribution |
-| 🌍 **Societal Impact & Governance** | How the bill affects labor, environment, democratic processes, and social equity |
+| 🌍 **Societal Impact & Public Interest** | How the bill affects labor, environment, democratic processes, and social equity |
+| ⚖️ **Governance Frameworks & Institutions** | How the bill establishes oversight bodies, regulatory frameworks, and enforcement mechanisms |
 
 ### 4. Quality Assurance
 A specialized "Judge" agent reviews all analyses, providing feedback and triggering revisions when needed to ensure consistent, high-quality results.
 
 ### 5. Structured Output
-Results are delivered in a clean, structured format that makes it easy to compare bills and identify trends.
+Results are delivered in a clean, structured format that makes it easy to compare bills and identify trends. The output includes:
+
+- The original bill data preserved from the input CSV
+- Extracted relevant bill text and plain-language summary
+- Detailed analyst results with scores and justifications
+- **Individual score columns** for each dimension (e.g., `market_structure_score`, `property_rights_score`) for easy filtering and analysis
+- Processing status and metadata
 
 ## 💻 Technical Overview
 
@@ -55,6 +63,12 @@ Bill Analyst is built as a local Python application using state-of-the-art AI te
 - **LangChain**: Provides core abstractions for agent interactions
 - **Pydantic**: Ensures data validation and schema enforcement
 - **Pandas**: Handles all CSV operations for input and output
+- **Robust JSON Parsing**: Custom implementation to handle special characters in text
+
+The system features:
+- **Modular "Graph of Graphs" architecture** where each specialized agent operates as its own subgraph
+- **Enhanced error handling** for reliable processing of complex legislative text
+- **Comprehensive context extraction** that maintains structural integrity of bills
 
 The system is designed as a "Graph of Graphs" where each specialized agent operates as its own subgraph, creating a modular, maintainable architecture.
 
@@ -109,17 +123,16 @@ Your input CSV should contain at minimum these columns:
 
 For each bill, Bill Analyst produces:
 - A concise 5-sentence summary in plain language
-- Scores (0-2) across four key dimensions
+- Scores (0-2) across six key dimensions
+- Individual score columns for easy analysis and visualization
 - Detailed justifications for each score
 - Processing status and metadata
+- All original data from the input file preserved
 
 ## 🔒 Privacy & Security
 
 Bill Analyst runs entirely on your local machine. Your legislative data never leaves your computer except for secure API calls to the language model.
 
-## 📞 Support & Feedback
-
-For questions, feature requests, or bug reports, please open an issue on our GitHub repository or contact our support team at support@billanalyst.ai.
 
 ---
 
