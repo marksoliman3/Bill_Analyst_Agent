@@ -5,6 +5,7 @@ __pycache__/
 
 # Ignore virtual environment
 .venv/
+venv/
 
 # Ignore environment variables
 .env
@@ -20,3 +21,8 @@ data/
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
+
+# Ignore testing scripts
+pytest.ini
+test_openai_key.py
+test_parser.py
