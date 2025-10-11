@@ -155,7 +155,7 @@ def make_analyst_node(analyst_key: str):
         parser = SanitizedJsonOutputParser()
 
         # Build chain
-        llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+        llm = ChatOpenAI(model="gpt-5-nano", temperature=0)
         chain = prompt | llm | parser
 
         try:

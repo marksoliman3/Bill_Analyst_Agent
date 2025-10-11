@@ -94,7 +94,7 @@ def judge_analysis(state: AgentState) -> AgentState:
     )
 
     # Build chain
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-5-nano", temperature=0)
     chain = prompt | llm | parser
 
     try:
