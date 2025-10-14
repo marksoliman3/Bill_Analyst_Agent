@@ -83,8 +83,43 @@ def extract_bill_text(state: AgentState) -> AgentState:
         logger.info(f"[EXTRACTOR] LLM call completed for bill {bill_id}")
 
         # Extract the bill_extracts field from the Pydantic model
-        state["bill_extracts"] = result.bill_extracts
-        extract_length = len(result.bill_extracts)
+        extracted_text = result.bill_extracts
+        
+        # Minimum extraction guarantee
+        if not extracted_text or len(extracted_text) < 50:
+            logger.warning(f"[EXTRACTOR] Empty or minimal extraction for bill {bill_id}. Providing fallback extraction.")
+            
+            # Extract bill title, intro and first section as a fallback
+            import re
+            
+            # Try to get bill title and first section
+            title_pattern = r"^(.*?(?:BILL|ACT).*?)(?:\n\n|$)"
+            title_match = re.search(title_pattern, raw_text, re.DOTALL | re.IGNORECASE)
+            
+            section_pattern = r"(?:Section 1\..*?)(?:\n\nSection 2\.|\Z)"
+            section_match = re.search(section_pattern, raw_text, re.DOTALL)
+            
+            # Build fallback text
+            fallback_text = ""
+            
+            if title_match:
+                fallback_text += title_match.group(0) + "\n\n"
+            
+            if section_match:
+                fallback_text += section_match.group(0)
+            
+            # If we couldn't extract structured content, use first 500 characters
+            if len(fallback_text) < 50:
+                fallback_text = raw_text[:min(500, len(raw_text))]
+            
+            # Add a note for downstream agents
+            fallback_text += "\n\n[NOTE: Limited relevant content found in this bill. Providing minimal extraction for analysis.]"
+            
+            extracted_text = fallback_text
+            logger.info(f"[EXTRACTOR] Used fallback extraction, resulting in {len(extracted_text)} characters")
+        
+        state["bill_extracts"] = extracted_text
+        extract_length = len(extracted_text)
         logger.info(
             f"[EXTRACTOR] Extracted {extract_length} characters for bill {bill_id}"
         )
