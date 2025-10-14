@@ -130,7 +130,18 @@ def main():
         # Update the status in the final state
         final_state["status"] = status
         
-        results.append(final_state)
+        # Create a cleaned version of the state with only the needed fields
+        cleaned_state = {
+            "bill_id": final_state.get("bill_id", ""),
+            "bill_extracts": final_state.get("bill_extracts", ""),
+            "summary": final_state.get("summary", ""),
+            "analyst_results": final_state.get("analyst_results", {}),
+            "retry_attempts": final_state.get("retry_attempts", {}),
+            "status": status
+        }
+        
+        # Only append the cleaned state to results
+        results.append(cleaned_state)
 
     # Convert results to DataFrame
     logger.info(f"Processed {len(results)} bills, preparing results for output")
@@ -200,8 +211,8 @@ def main():
             return None
     
     # Extract individual scores from analyst_results
-    analyst_keys = ["market_structure", "product_safety", "ai_use_transparency", 
-                    "property_rights", "societal_impact", "governance_frameworks"]
+    analyst_keys = ["product_safety", "property_rights", "market_structure", "specific_use", 
+                    "societal_impact", "institutional_processes", "funding_economic"]
     score_columns = [f"{key}_score" for key in analyst_keys]
     
     # Create columns for individual scores

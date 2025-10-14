@@ -32,16 +32,17 @@ Our system identifies and extracts only the most relevant portions of bills, foc
 Complex legal language is transformed into concise, clear summaries that anyone can understand.
 
 ### 3. Multi-Dimensional Analysis
-Each bill is analyzed across six critical dimensions by specialized AI analysts:
+Each bill is analyzed across seven critical dimensions by specialized AI analysts:
 
 | Dimension | What It Measures |
 |-----------|------------------|
-| 🏢 **Market Structure & Competition** | How the bill affects market dynamics, competition, and business operations |
-| 🛡️ **Product Safety & Accountability** | How the bill addresses safety standards, testing, and accountability measures |
-| 🔍 **AI Use, Transparency & Disclosure** | How the bill regulates AI deployment, requires transparency, and mandates disclosures |
-| 📜 **Property Rights & Attribution** | How the bill impacts intellectual property, data rights, and attribution |
-| 🌍 **Societal Impact & Public Interest** | How the bill affects labor, environment, democratic processes, and social equity |
-| ⚖️ **Governance Frameworks & Institutions** | How the bill establishes oversight bodies, regulatory frameworks, and enforcement mechanisms |
+| 🛡️ **Product Safety, Accountability, & Risk** | How the bill addresses safety testing, reliability standards, transparency, and accountability |
+| 📜 **Property Rights, Attribution, & Data** | How the bill impacts IP rights, creator compensation, and consumer data privacy |
+| 🏢 **Market Structure & Competition** | How the bill ensures fair competition, data sharing, and computing resource allocation |
+| 🔍 **Specific Use & Sectoral Regulation** | How the bill regulates AI in high-risk sectors, employment, and content policies |
+| 🌍 **Societal Impact & Future Planning** | How the bill addresses labor markets, environmental sustainability, and democratic processes |
+| ⚖️ **Institutional Processes & Governance** | How the bill establishes advisory bodies, regulatory frameworks, and agency authorities |
+| 💰 **Funding & Economic Development** | How the bill allocates resources, creates incentives, and invests in infrastructure |
 
 ### 4. Quality Assurance
 A specialized "Judge" agent reviews all analyses, providing feedback and triggering revisions when needed to ensure consistent, high-quality results.
@@ -123,7 +124,7 @@ Your input CSV should contain at minimum these columns:
 
 For each bill, Bill Analyst produces:
 - A concise 5-sentence summary in plain language
-- Scores (0-2) across six key dimensions
+- Scores (0-2) across seven key dimensions
 - Individual score columns for easy analysis and visualization
 - Detailed justifications for each score
 - Processing status and metadata
