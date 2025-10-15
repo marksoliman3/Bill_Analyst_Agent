@@ -150,40 +150,26 @@ def main():
     # Create DataFrame from original bill data
     original_df = pd.DataFrame(original_bill_data)
     
-    # Reset indices to ensure proper alignment
-    original_df = original_df.reset_index(drop=True)
-    results_df = results_df.reset_index(drop=True)
-    
     # Ensure bill_id is present in both DataFrames for merging
     if 'bill_id' not in results_df.columns and 'Bill_Number' in original_df.columns:
-        results_df['bill_id'] = results_df.apply(lambda row: row.get('bill_id', ''), axis=1)
+        results_df['bill_id'] = original_df['Bill_Number']
     
     # Columns to keep from the results DataFrame
     analysis_columns = ['bill_extracts', 'summary', 'analyst_results', 'retry_attempts', 'status']
     # Only keep columns that exist in the results DataFrame
     existing_analysis_columns = [col for col in analysis_columns if col in results_df.columns]
     
-    logger.info(f"Original DataFrame shape: {original_df.shape}")
-    logger.info(f"Results DataFrame shape: {results_df.shape}")
-    logger.info(f"Original bill IDs: {list(original_df['Bill_Number'] if 'Bill_Number' in original_df.columns else [])}")
-    logger.info(f"Result bill IDs: {list(results_df['bill_id'] if 'bill_id' in results_df.columns else [])}")
+    # Create a new DataFrame with all original columns plus analysis columns
+    merged_df = pd.DataFrame()
     
-    # Use proper merge operation instead of column-by-column copying
-    merged_df = pd.merge(
-        original_df, 
-        results_df[existing_analysis_columns + ['bill_id']], 
-        left_on='Bill_Number',  # Column in original_df to match on
-        right_on='bill_id',     # Column in results_df to match on
-        how='left'              # Keep all rows from original_df
-    )
+    # Add all original columns
+    for col in original_df.columns:
+        merged_df[col] = original_df[col]
     
-    # Remove duplicate bill_id column if it exists
-    if 'bill_id_y' in merged_df.columns:
-        merged_df = merged_df.drop(columns=['bill_id_y'])
-    if 'bill_id_x' in merged_df.columns and 'bill_id' not in merged_df.columns:
-        merged_df = merged_df.rename(columns={'bill_id_x': 'bill_id'})
-        
-    logger.info(f"Merged DataFrame shape: {merged_df.shape}")
+    # Add analysis columns
+    for col in existing_analysis_columns:
+        if col in results_df.columns:
+            merged_df[col] = results_df[col]
     
     # Helper function to safely extract scores
     def extract_score(analyst_results, key):
