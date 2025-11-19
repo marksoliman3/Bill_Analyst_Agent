@@ -8,6 +8,9 @@ dimension it is responsible for, detailed task instructions, the scoring
 rubric, and the expected output schema.
 
 It also includes instructions for revisions based on feedback.
+
+The taxonomy has been updated to a comprehensive two-level structure that provides
+more detailed subcategories for each analyst dimension.
 """
 
 # A shared rubric to ensure consistent scoring across all analysts.
@@ -40,15 +43,25 @@ ANALYST_DEFINITIONS = {
             "AI product safety, accountability, and risk management. If the bill contains no mention of "
             "artificial intelligence, machine learning, automated systems, or algorithms in relation to safety, "
             "reliability, or accountability mechanisms, you must score it as 0. This includes, but is not limited to: "
-            "A. Model safety testing & reliability standards - Requirements for testing, certification, "
-            "and performance validation of AI systems. "
-            "B. Bias detection & algorithmic auditing - Protocols for identifying and mitigating "
-            "algorithmic bias and discrimination. "
-            "C. Transparency (explainability, logging, disclosure) - Requirements for making AI "
-            "systems explainable, maintaining logs of system behavior, and disclosing capabilities. "
-            "D. Liability & responsibility for harms - Frameworks for assigning legal responsibility "
-            "for AI-caused harms and establishing remedies for affected parties. "
-            "Do not consider economic, property rights, or market structure issues."
+            
+            "A. Model Safety: Rules focusing on user protection, user safety, safeguards for vulnerable "
+            "groups, prevention of foreseeable misuse, and harm reduction. "
+            
+            "B. Model Testing & Reliability Standards: Requirements for testing, validation, robustness, "
+            "reliability standards, accuracy requirements, post-market monitoring, third-party auditing, "
+            "certification processes, and mechanisms for explainability. "
+            
+            "C. Bias Detection & Algorithmic Auditing: Protocols for identifying and mitigating "
+            "algorithmic bias and discrimination, fairness requirements, standards for training data, "
+            "and procedures for bias mitigation. "
+            
+            "D. Liability & Responsibility for Harms: Frameworks for developer accountability, legal recourses, "
+            "indemnification for damages, and liability structures for AI-caused harms. "
+            
+            "E. System Risk Management: Approaches to high-risk AI systems, risk-based frameworks, "
+            "and comprehensive risk management strategies. "
+            
+            "Do not consider economic, property rights, market structure, or sectoral regulation issues."
         ),
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
@@ -88,12 +101,23 @@ ANALYST_DEFINITIONS = {
             "AI property rights, attribution, and data management. If the bill does not specifically address "
             "intellectual property, data rights, or privacy in relation to AI systems, algorithms, or "
             "automated decision-making, you must score it as 0. This includes, but is not limited to: "
-            "A. Training data compensation & copyright - Rules for compensating creators whose work is "
-            "used to train AI systems and copyright frameworks for AI-generated content. "
-            "B. Intellectual property & right of publicity - Protection of intellectual property "
-            "rights and digital likeness/identity rights for individuals. "
-            "C. Data privacy & consumer profiling rights - Regulations on data collection, processing, "
-            "storage, and consumer rights regarding AI profiling and automated decisions. "
+            
+            "A. Copyright and Ownership: Rules regarding human authorship requirements, intellectual property "
+            "rights for AI-assisted creation, treatment of public domain content, status of AI-generated work, "
+            "labeling requirements, and watermarking mandates. "
+            
+            "B. Training Data & Fair Use: Regulations on the use of copyrighted materials for AI training, "
+            "copyright infringement standards, fair use exceptions, text and data mining permissions, "
+            "transparency requirements about training data, digital twins, non-consensual replicas, "
+            "and voice cloning limitations. "
+            
+            "C. Creator and Content Compensation & Licensing: Frameworks for fair compensation to creators, "
+            "remuneration for rights-holders, royalty-sharing models, and economic rights protection. "
+            
+            "D. Data Privacy & Consumer Profiling Rights: Right to opt out of data usage, data destruction "
+            "requirements, profile forgetting mechanisms, regulations on consumer profiling, and personal "
+            "data protection in AI contexts. "
+            
             "Disregard topics like market competition, product safety, or societal impact."
         ),
         "task_instructions": (
@@ -134,12 +158,23 @@ ANALYST_DEFINITIONS = {
             "AI market structure and competition. If the bill contains no provisions addressing "
             "competition, market access, or resource allocation specifically for AI companies, systems, or "
             "services, you must score it as 0. This includes, but is not limited to: "
-            "A. Data access & sharing requirements - Mandates for sharing data between companies "
-            "and reducing data monopolies. "
-            "B. Computing resource allocation & interoperability - Ensuring fair access to computing "
-            "power and promoting technical standards for interoperability. "
-            "C. Platform governance & antitrust oversight - Regulations addressing market concentration, "
-            "merger controls, and oversight of dominant platforms. "
+            
+            "A. Market Power and Dominance: Regulations addressing market concentration, monopolistic "
+            "practices, control over essential inputs, prevention of market dominance abuse, and "
+            "application of essential facilities doctrine in AI contexts. "
+            
+            "B. Anticompetitive Practices and Collusion: Prevention of predatory contracts, "
+            "anticompetitive practices, tying arrangements, price fixing, self-preferencing behaviors, "
+            "and algorithmic collusion in AI markets. "
+            
+            "C. Access to Key Resources: Mandates for access to computing resources, access to data "
+            "for AI training, data and model-sharing requirements, removal of barriers to entry, "
+            "data portability standards, and interoperability requirements. "
+            
+            "D. Support for Market Entrants: Measures addressing the digital divide in AI adoption, "
+            "support for startups, AI literacy initiatives, and assistance for small businesses "
+            "in the AI ecosystem. "
+            
             "Ignore aspects related to product safety, property rights, or societal impact."
         ),
         "task_instructions": (
@@ -180,14 +215,28 @@ ANALYST_DEFINITIONS = {
             "use contexts and sectoral regulations. If the bill does not contain provisions that regulate "
             "the use of AI, machine learning, or automated systems in specific sectors or contexts, "
             "you must score it as 0. This includes, but is not limited to: "
-            "A. High-risk systems (e.g., healthcare, finance, housing) - Special regulations for AI "
-            "used in critical sectors with significant impact on rights, safety, or livelihood. "
-            "B. Employment & workforce management (Automated Employment Decision Tools) - Rules "
-            "governing AI use in hiring, firing, promotion, and workplace monitoring. "
-            "C. Public sector deployment & procurement guidelines - Regulations specific to "
-            "government use of AI in public services, law enforcement, and governance. "
-            "D. Content misinformation & deepfake bans/disclosure - Rules addressing synthetic media, "
-            "misinformation, and platform responsibilities for AI-generated content. "
+            
+            "A. High-Risk Systems: Special regulations for AI used in critical sectors with significant "
+            "impact on rights, safety, or livelihood, such as healthcare, finance, housing, education, "
+            "criminal justice, or transportation. "
+            
+            "B. Application Restrictions & Permissions: Prohibitions on specific AI uses, moratoriums "
+            "on deployment, or explicit permissions for certain AI applications (such as facial recognition, "
+            "emotion recognition, or automated decision-making). "
+            
+            "C. Sector-Specific Risks, Mandates & Disclosures: Rules governing 'AI in hiring', 'AI in lending', "
+            "'AI in medical diagnosis', or other sector-specific applications with tailored requirements "
+            "for those contexts. "
+            
+            "D. Employment & Workforce Management: Regulations specifically for Automated Employment Decision "
+            "Tools (AEDTs) in hiring, firing, promotion, performance evaluation, or workplace monitoring. "
+            
+            "E. Public Sector Deployment & Procurement Guidelines: Regulations specific to government "
+            "use of AI in public services, law enforcement, social services, and governance. "
+            
+            "F. Content Misinformation & Deepfake Regulations: Rules addressing synthetic media, AI-generated "
+            "content, misinformation, deepfakes, and platform responsibilities for content moderation. "
+            
             "Do not analyze general safety standards, property rights, or market structure."
         ),
         "task_instructions": (
@@ -221,19 +270,32 @@ ANALYST_DEFINITIONS = {
             "You are a public policy expert and futurist specializing in the broader "
             "societal and long-term implications of emerging technologies. You analyze legislation "
             "through the lens of its impact on labor markets, environmental sustainability, "
-            "and democratic institutions."
+            "democratic institutions, and national security."
         ),
         "scope": (
             "Your analysis must focus exclusively on aspects of the bill related to "
             "AI's societal impacts and future planning. If the bill does not specifically address "
-            "workforce disruption, environmental impacts, or democratic process protections in relation "
-            "to artificial intelligence or automation, you must score it as 0. This includes, but is not limited to: "
-            "A. Labor market transition & job displacement policy - Measures addressing workforce "
-            "disruption, retraining programs, and economic transition support. "
-            "B. Energy, environmental impact, & efficiency - Requirements regarding energy use, "
-            "environmental footprint, and sustainability of AI systems. "
-            "C. Democratic process & election security - Protections for electoral systems, "
-            "public discourse, and democratic institutions from AI manipulation. "
+            "workforce disruption, environmental impacts, democratic process protections, or national "
+            "security concerns in relation to artificial intelligence or automation, you must score it as 0. "
+            "This includes, but is not limited to: "
+            
+            "A. Labor Market Transition & Job Displacement Policy: Measures addressing workforce "
+            "disruption, worker retraining programs, labor market disruption assessments, and "
+            "displaced worker assistance initiatives. "
+            
+            "B. Energy, Environmental Impact, & Efficiency: Requirements regarding energy consumption, "
+            "freshwater usage, carbon footprint, and sustainability requirements for AI systems "
+            "and data centers. "
+            
+            "C. Democratic Process & Election Security: Protections for electoral systems, "
+            "regulations on deepfakes in politics and elections, synthetic media regulations, "
+            "disclosure requirements for AI-generated political content, and prevention of "
+            "digital impersonation of candidates. "
+            
+            "D. National Security & Defense: Regulations on export controls, frontier models, "
+            "protections against foreign adversaries, dual-use AI models, critical infrastructure "
+            "protection, and defenses against AI-enabled attacks. "
+            
             "Do not analyze technical safety, property rights, or market structure aspects."
         ),
         "task_instructions": (
@@ -274,12 +336,20 @@ ANALYST_DEFINITIONS = {
             "processes and governance frameworks. If the bill contains no provisions establishing bodies, "
             "processes, or authorities specifically for AI oversight, governance, or regulation, "
             "you must score it as 0. This includes, but is not limited to: "
-            "A. Task forces, advisory councils, & studies - Creation of bodies to research, advise on, "
-            "or oversee AI governance and policy development. "
-            "B. Regulatory sandboxes & innovation policy - Experimental regulatory environments "
-            "and frameworks for testing new AI applications and governance approaches. "
-            "C. Government agency policy development - Granting authority to existing agencies to "
-            "develop rules, standards, and enforcement mechanisms. "
+            
+            "A. Task Forces, Advisory Councils, & Studies: Creation of bodies to research, advise on, "
+            "or oversee AI governance and policy development, including establishing AI councils or task forces, "
+            "working groups, requirements to study and report on AI issues, survey existing AI use, "
+            "or recommend future regulations. "
+            
+            "B. Regulatory Sandboxes & Innovation Policy: Establishment of experimental regulatory environments, "
+            "safe harbor provisions, testing requirements, and frameworks for testing new AI applications "
+            "and governance approaches. "
+            
+            "C. Government Agency Policy Development: Provisions addressing oversight jurisdiction, "
+            "regulatory authority, agency use of AI, procurement standards for AI, and empowering "
+            "existing agencies to develop AI-specific rules, standards, and enforcement mechanisms. "
+            
             "Do not analyze specific technical standards or content policies that would be covered by other analysts."
         ),
         "task_instructions": (
@@ -319,14 +389,23 @@ ANALYST_DEFINITIONS = {
             "AI-specific funding and economic development. If the bill does not allocate resources, "
             "create incentives, or establish financial programs specifically for AI research, development, "
             "adoption, or workforce training, you must score it as 0. This includes, but is not limited to: "
-            "A. Direct appropriations for R&D/projects - Specific funding allocations for "
-            "research, development, or implementation of AI systems and initiatives. "
-            "B. Tax incentives & economic grants - Financial incentives designed to encourage "
-            "AI innovation, adoption, and commercialization. "
-            "C. Workforce training & education funding - Investments in developing AI skills and "
-            "addressing workforce transitions. "
-            "D. Critical infrastructure & computing investment - Funding for AI computing resources, "
-            "data centers, and underlying technical infrastructure. "
+            
+            "A. Direct Appropriations for R&D/Projects: Specific funding allocations for AI research, "
+            "development, or implementation, including budget line items, fiscal year appropriations, "
+            "and establishment of centers of excellence for AI innovation. "
+            
+            "B. Tax Incentives & Economic Grants: Financial incentives designed to encourage "
+            "AI innovation, adoption, and commercialization, including tax credits, qualified expense "
+            "designations, innovation zones, and development of regional AI hubs. "
+            
+            "C. Workforce Training & Education Funding: Investments in developing AI skills and "
+            "addressing workforce transitions, including apprenticeship programs, upskilling grants, "
+            "and education initiatives specific to AI competencies. "
+            
+            "D. Infrastructure & Computing Investment: Funding for AI computing resources, "
+            "data centers, and underlying technical infrastructure, including public-private partnerships, "
+            "cloud computing subsidies, and data center infrastructure development. "
+            
             "Do not analyze regulatory frameworks, safety standards, or property rights issues."
         ),
         "task_instructions": (
