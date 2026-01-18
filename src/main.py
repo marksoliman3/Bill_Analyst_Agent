@@ -175,13 +175,14 @@ def main():
     def extract_score(analyst_results, key):
         """
         Safely extract a score from analyst results with robust error handling.
+        Ensures the score is one of the valid values: 0, 0.5, or 1.
         
         Args:
             analyst_results: The dictionary of analyst results
             key: The analyst key to extract score for
             
         Returns:
-            int or None: The extracted score, or None if not available
+            float or None: The extracted score (0, 0.5, or 1), or None if not available
         """
         try:
             # Check if analyst_results is a dictionary and contains the key
@@ -193,16 +194,26 @@ def main():
             if not isinstance(analyst_result, dict):
                 return None
                 
-            # Extract and validate the score
+            # Extract the score
             score = analyst_result.get('score')
             
-            # Ensure score is an integer
+            # Ensure score is a float and one of the valid values
             if score is not None:
                 try:
-                    return int(score)
+                    # Convert to float in case it's a string or integer
+                    score_float = float(score)
+                    
+                    # Validate that score is one of the allowed values
+                    valid_scores = [0, 0.5, 1]
+                    if score_float not in valid_scores:
+                        # Find the closest valid score
+                        closest = min(valid_scores, key=lambda x: abs(x - score_float))
+                        logger.warning(f"Invalid score {score_float} for {key} coerced to nearest valid value: {closest}")
+                        return closest
+                    return score_float
                 except (ValueError, TypeError):
-                    # If score can't be converted to int, log and return None
-                    logger.warning(f"Non-integer score found for {key}: {score}")
+                    # If score can't be converted to float, log and return None
+                    logger.warning(f"Non-numeric score found for {key}: {score}, defaulting to None")
                     return None
             return None
         except Exception as e:

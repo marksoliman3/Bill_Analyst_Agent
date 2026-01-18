@@ -1,7 +1,7 @@
 from typing import TypedDict, List, Optional, Dict, Any, Literal
 from typing_extensions import Annotated
 from langgraph.graph import add_messages
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class AgentState(TypedDict, total=False):
@@ -49,9 +49,15 @@ class ExtractOutput(BaseModel):
 
 
 class AnalystOutput(BaseModel):
-    score: int
+    score: float
     justification: str
     attempts: int
+    
+    @validator('score')
+    def validate_score(cls, v):
+        if v not in [0, 0.5, 1]:
+            raise ValueError(f'Score must be exactly 0, 0.5, or 1, got {v}')
+        return v
 
 
 # Add a nested model for the judgement content

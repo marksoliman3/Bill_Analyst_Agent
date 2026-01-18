@@ -13,16 +13,16 @@ It also includes instructions for revisions based on feedback.
 # A shared rubric to ensure consistent scoring across all analysts.
 # This can be injected into each analyst's prompt.
 SCORING_RUBRIC = """
-**Scoring Rubric (0-2 Scale):**
+**Scoring Rubric (0-0.5-1 Scale):**
 - **0: Not Mentioned:** The bill text does not mention or allude to this dimension at all.
-- **1: Moderately Addressed:** The bill contains specific provisions that substantively address this dimension, but it is not the primary focus of the legislation.
-- **2: Strongly Addressed:** The bill's central purpose and main provisions are directly focused on this dimension. It is a primary driver of the legislation.
+- **0.5: Moderately Addressed:** The bill contains specific provisions that substantively address this dimension, but it is not the primary focus of the legislation.
+- **1: Strongly Addressed:** The bill's central purpose and main provisions are directly focused on this dimension. It is a primary driver of the legislation.
 """
 
 # The expected JSON output structure for all analyst agents.
 # This helps enforce a consistent output format using an output parser.
 OUTPUT_SCHEMA = {
-    "score": "integer",
+    "score": "number",  # Changed from "integer" to "number" to support float values (0, 0.5, 1)
     "justification": "string",
 }
 
@@ -67,10 +67,10 @@ ANALYST_DEFINITIONS = {
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -79,10 +79,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Product Safety, Accountability, & Risk",
@@ -129,10 +129,10 @@ ANALYST_DEFINITIONS = {
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -141,10 +141,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Property Rights, Attribution, & Data",
@@ -189,10 +189,10 @@ ANALYST_DEFINITIONS = {
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -201,10 +201,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Market Structure & Competition",
@@ -249,17 +249,17 @@ ANALYST_DEFINITIONS = {
             "whether they are political, pornographic, or commercial. "
             
             "**CRITICAL EXCLUSION:** If a bill applies generally to **all** trade and commerce (e.g., "
-            "'All businesses must label AI content'), score this as 0 or 1. Only score 2 if the bill "
+            "'All businesses must label AI content'), score this as 0 or 0.5. Only score 1 if the bill "
             "targets a specific *vertical* sector (e.g., Healthcare) or a specific *prohibited application* "
             "(e.g., Deepfake Porn)."
         ),
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -268,10 +268,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Specific Use & Sectoral Regulation",
@@ -317,10 +317,10 @@ ANALYST_DEFINITIONS = {
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -329,10 +329,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Societal Impact & Future Planning",
@@ -371,10 +371,10 @@ ANALYST_DEFINITIONS = {
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -383,10 +383,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Institutional Processes & Governance",
@@ -423,16 +423,16 @@ ANALYST_DEFINITIONS = {
             "cloud computing subsidies, and data center infrastructure development. "
             
             "**CRITICAL INSTRUCTION:** If a bill creates a financial obligation for the state to pay for "
-            "AI tools or implementation (e.g. reimbursement mechanisms), score this as 2, even if the "
+            "AI tools or implementation (e.g. reimbursement mechanisms), score this as 1, even if the "
             "specific word 'Appropriation' is absent."
         ),
         "task_instructions": (
             "Based on the provided bill extracts, you must determine a relevance score for your specific dimension. "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an overall score from 0-2. "
+            "Then, using the provided scoring rubric, assign an overall score from the following values only: 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your score, citing "
             "specific elements from the text. Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "revision_instructions": (
@@ -441,10 +441,10 @@ ANALYST_DEFINITIONS = {
             "Re-evaluate the bill extracts in light of this feedback and provide an updated response. "
             "Your new response must still follow all original instructions: "
             "First, reason through how the text relates to your specific scope. "
-            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. "
+            "Then, using the provided scoring rubric, assign an updated score that addresses the judge's feedback. The score must be exactly 0, 0.5, or 1. "
             "Finally, provide a brief but clear justification for your new score, citing specific elements from the text. "
             "Your output must be a valid JSON object with the following fields:\n"
-            "- score: An integer from 0-2\n"
+            "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
         "taxonomy_dimension": "Funding & Economic Development",

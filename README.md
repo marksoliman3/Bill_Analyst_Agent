@@ -32,7 +32,7 @@ Our system identifies and extracts only the most relevant portions of bills, foc
 Complex legal language is transformed into concise, clear summaries that anyone can understand.
 
 ### 3. Multi-Dimensional Analysis
-Each bill is analyzed across seven critical dimensions by specialized AI analysts:
+Each bill is analyzed across seven critical dimensions by specialized AI analysts, with a scoring scale of 0-0.5-1:
 
 | Dimension | What It Measures |
 |-----------|------------------|
@@ -124,7 +124,7 @@ Your input CSV should contain at minimum these columns:
 
 For each bill, Bill Analyst produces:
 - A concise 5-sentence summary in plain language
-- Scores (0-2) across seven key dimensions
+- Scores (0-0.5-1) across seven key dimensions
 - Individual score columns for easy analysis and visualization
 - Detailed justifications for each score
 - Processing status and metadata

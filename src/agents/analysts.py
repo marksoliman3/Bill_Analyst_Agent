@@ -45,6 +45,7 @@ def sanitize_for_json(text: str) -> str:
 class SanitizedJsonOutputParser(JsonOutputParser):
     """
     A JSON output parser that sanitizes the text before parsing.
+    Also validates and enforces the score to be only 0, 0.5, or 1.
     """
     
     def parse(self, text: str) -> Dict[str, Any]:
@@ -55,11 +56,31 @@ class SanitizedJsonOutputParser(JsonOutputParser):
             text (str): The text to parse
             
         Returns:
-            Dict[str, Any]: The parsed JSON object
+            Dict[str, Any]: The parsed JSON object with validated score
         """
         sanitized_text = sanitize_for_json(text)
         try:
-            return super().parse(sanitized_text)
+            result = super().parse(sanitized_text)
+            # Validate and normalize score to ensure it's exactly 0, 0.5, or 1
+            if "score" in result:
+                score_value = result["score"]
+                # Convert to float if it's a string but looks like a number
+                if isinstance(score_value, str):
+                    try:
+                        score_value = float(score_value)
+                        result["score"] = score_value
+                    except ValueError:
+                        logger.warning(f"Non-numeric score found: {score_value}, defaulting to 0")
+                        result["score"] = 0
+                
+                # Ensure score is one of the valid values
+                if result["score"] not in [0, 0.5, 1]:
+                    # Find the closest valid score
+                    valid_scores = [0, 0.5, 1]
+                    closest = min(valid_scores, key=lambda x: abs(x - float(result["score"])))
+                    logger.warning(f"Invalid score {result['score']} coerced to nearest valid value: {closest}")
+                    result["score"] = closest
+            return result
         except Exception as e:
             logger.warning(f"JSON parsing failed even after sanitization: {e}")
             # If parsing still fails, try a more direct approach with json.loads
@@ -70,7 +91,26 @@ class SanitizedJsonOutputParser(JsonOutputParser):
                 if start_idx != -1 and end_idx != -1:
                     json_text = text[start_idx:end_idx+1]
                     sanitized_json = sanitize_for_json(json_text)
-                    return json.loads(sanitized_json)
+                    result = json.loads(sanitized_json)
+                    
+                    # Apply the same score validation as above
+                    if "score" in result:
+                        score_value = result["score"]
+                        if isinstance(score_value, str):
+                            try:
+                                score_value = float(score_value)
+                                result["score"] = score_value
+                            except ValueError:
+                                logger.warning(f"Non-numeric score found in fallback parsing: {score_value}, defaulting to 0")
+                                result["score"] = 0
+                                
+                        # Ensure score is one of the valid values
+                        if result["score"] not in [0, 0.5, 1]:
+                            valid_scores = [0, 0.5, 1]
+                            closest = min(valid_scores, key=lambda x: abs(x - float(result["score"])))
+                            logger.warning(f"Invalid score {result['score']} in fallback parsing coerced to nearest valid value: {closest}")
+                            result["score"] = closest
+                    return result
                 else:
                     raise ValueError("Could not find JSON-like content")
             except Exception as inner_e:
