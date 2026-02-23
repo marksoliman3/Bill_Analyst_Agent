@@ -380,8 +380,8 @@ ANALYST_DEFINITIONS = {
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },
-    "societal_impact": {
-        "name": "Societal Impact & Future Planning Analyst",
+    "societal_risks": {
+        "name": "Existential and Societal Risks Analyst",
         "persona": (
             "You are a public policy expert and futurist specializing in the broader "
             "societal and long-term implications of emerging technologies. You analyze legislation "
@@ -415,10 +415,12 @@ ANALYST_DEFINITIONS = {
             "protection, and defenses against AI-enabled attacks. "
 
             "E. Existential & Catastrophic Risk: Legislation addressing global-scale AI risks, "
-            "including scenarios where AI systems pursue objectives misaligned with human welfare, "
-            "produce widespread unemployment across multiple sectors, or pose threats to human "
-            "autonomy and survival. This includes provisions addressing loss of human control over "
-            "AI systems and safeguards against catastrophic outcomes. "
+            "including: threat of human extinction due to rogue AI; AI supremacy over humans or "
+            "loss of human control over AI systems; threats to human and societal welfare due to "
+            "massive unemployment across multiple sectors; threats to human society due to massive "
+            "misinformation and erosion of public trust; and other scenarios where AI systems pursue "
+            "objectives misaligned with human welfare or pose threats to human autonomy and survival. "
+            "This includes safeguards against catastrophic outcomes at a societal or civilizational scale. "
 
             "**MANDATORY EXCLUSIONS — APPLY STRICTLY:** "
             "1. Do NOT score deepfake or synthetic media regulations—even when they relate to elections. "
@@ -461,7 +463,7 @@ ANALYST_DEFINITIONS = {
             "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
-        "taxonomy_dimension": "Societal Impact & Future Planning",
+        "taxonomy_dimension": "Existential and Societal Risks",
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },

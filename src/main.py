@@ -223,7 +223,7 @@ def main():
     
     # Extract individual scores from analyst_results
     analyst_keys = ["product_safety", "property_rights", "market_structure", "specific_use", 
-                    "societal_impact", "institutional_processes", "funding_economic"]
+                    "societal_risks", "institutional_processes", "funding_economic"]
     score_columns = [f"{key}_score" for key in analyst_keys]
     
     # Create columns for individual scores

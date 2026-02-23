@@ -40,7 +40,7 @@ Each bill is analyzed across seven critical dimensions by specialized AI analyst
 | 📜 **Property Rights, Attribution, & Data** | How the bill impacts IP rights, creator compensation, and consumer data privacy |
 | 🏢 **Market Structure & Competition** | How the bill ensures fair competition, data sharing, and computing resource allocation |
 | 🔍 **Specific Use & Sectoral Regulation** | How the bill regulates AI in high-risk sectors, employment, and content policies |
-| 🌍 **Societal Impact & Future Planning** | How the bill addresses labor markets, environmental sustainability, and democratic processes |
+| 🌍 **Existential and Societal Risks** | How the bill addresses labor markets, environmental sustainability, and democratic processes |
 | ⚖️ **Institutional Processes & Governance** | How the bill establishes advisory bodies, regulatory frameworks, and agency authorities |
 | 💰 **Funding & Economic Development** | How the bill allocates resources, creates incentives, and invests in infrastructure |
 
