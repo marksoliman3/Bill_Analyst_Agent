@@ -16,8 +16,47 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
 from typing import Any, Dict, Callable
 import json
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
 
 logger = logging.getLogger(__name__)
+
+# Define which exceptions should trigger a retry
+def is_retryable_error(exception):
+    """
+    Determine if an exception should trigger a retry.
+    Specifically targets OpenAI server-side errors (500s).
+    """
+    logger.info(f"Checking if exception is retryable: {str(exception)}")
+    
+    # Check if it's an exception with a response attribute (like openai.APIError)
+    if hasattr(exception, 'response') and exception.response:
+        if exception.response.status_code >= 500:
+            logger.warning(f"Retryable server error detected: {exception.response.status_code}")
+            return True
+    
+    # Check error message for common server error indicators
+    error_str = str(exception).lower()
+    if any(indicator in error_str for indicator in ['server error', 'timeout', 'rate limit', 'overloaded']):
+        logger.warning(f"Retryable error detected from error message: {error_str}")
+        return True
+        
+    return False
+
+# Create a retry decorator for LLM calls
+@retry(
+    retry=retry_if_exception(is_retryable_error),
+    stop=stop_after_attempt(3),  # Try 3 times max
+    wait=wait_exponential(multiplier=1, min=2, max=10),  # Start with 2s, then 4s, then 8s
+    reraise=True,  # Reraise the last exception if all retries fail
+    before_sleep=lambda retry_state: logger.warning(
+        f"Retrying LLM call after error. Attempt {retry_state.attempt_number} of 3. "
+        f"Waiting {retry_state.next_action.sleep} seconds..."
+    )
+)
+def call_llm_with_retry(chain, inputs):
+    """Call the LLM with retry logic for transient errors."""
+    logger.info(f"Calling LLM with retry logic, inputs: {str(inputs)[:100]}...")
+    return chain.invoke(inputs)
 
 
 def sanitize_for_json(text: str) -> str:
@@ -194,13 +233,19 @@ def make_analyst_node(analyst_key: str):
         # Define parser with sanitization
         parser = SanitizedJsonOutputParser()
 
-        # Build chain
-        llm = ChatOpenAI(model="gpt-5-nano", temperature=0)
+        # Build chain with improved configuration
+        llm = ChatOpenAI(
+            model="gpt-5-nano", 
+            temperature=0,
+            request_timeout=60,  # 60-second timeout to prevent hanging requests
+            max_retries=2        # Built-in retries for network issues
+        )
         chain = prompt | llm | parser
 
         try:
             logger.info(f"[ANALYST:{analyst_key}] Calling LLM for bill {bill_id}")
-            result = chain.invoke({"bill_extracts": bill_extracts})
+            # Use the retry wrapper instead of calling directly
+            result = call_llm_with_retry(chain, {"bill_extracts": bill_extracts})
             logger.info(
                 f"[ANALYST:{analyst_key}] LLM call completed for bill {bill_id}"
             )
@@ -226,9 +271,13 @@ def make_analyst_node(analyst_key: str):
             logger.error(f"[ANALYST:{analyst_key}] Failed for bill {bill_id}: {e}")
             if "analyst_results" not in state:
                 state["analyst_results"] = {}
-            state["analyst_results"][analyst_key] = {"error": str(e)}
+            state["analyst_results"][analyst_key] = {
+                "error": str(e),
+                "score": 0,  # Add fallback score directly with the error
+                "justification": f"Error during analysis: {str(e)}"
+            }
             logger.error(
-                f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}"
+                f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}, added fallback score 0"
             )
 
         logger.info(f"[ANALYST:{analyst_key}] Completed analysis for bill {bill_id}")

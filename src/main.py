@@ -131,11 +131,13 @@ def main():
         final_state["status"] = status
         
         # Create a cleaned version of the state with only the needed fields
+        # Prioritize the consolidated results which include fallbacks for missing analysts
+        consolidated_results = final_state.get("consolidated_report", {}).get("analyst_results", {})
         cleaned_state = {
             "bill_id": final_state.get("bill_id", ""),
             "bill_extracts": final_state.get("bill_extracts", ""),
             "summary": final_state.get("summary", ""),
-            "analyst_results": final_state.get("analyst_results", {}),
+            "analyst_results": consolidated_results or final_state.get("analyst_results", {}),
             "retry_attempts": final_state.get("retry_attempts", {}),
             "status": status
         }
