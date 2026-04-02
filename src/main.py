@@ -171,28 +171,36 @@ def main():
         if col in results_df.columns:
             merged_df[col] = results_df[col]
     
-    # Helper function to safely extract scores
+    # Helper function to safely extract scores with fallback to 0
     def extract_score(analyst_results, key):
         """
         Safely extract a score from analyst results with robust error handling.
         Ensures the score is one of the valid values: 0, 0.5, or 1.
+        Uses a fallback score of 0 when errors are detected.
         
         Args:
             analyst_results: The dictionary of analyst results
             key: The analyst key to extract score for
             
         Returns:
-            float or None: The extracted score (0, 0.5, or 1), or None if not available
+            float: The extracted score (0, 0.5, or 1), with a fallback of 0 for errors
         """
         try:
             # Check if analyst_results is a dictionary and contains the key
             if not isinstance(analyst_results, dict):
-                return None
+                logger.warning(f"analyst_results is not a dictionary, using fallback score 0 for {key}")
+                return 0
                 
             # Get the analyst's result
             analyst_result = analyst_results.get(key, {})
             if not isinstance(analyst_result, dict):
-                return None
+                logger.warning(f"Result for {key} is not a dictionary, using fallback score 0")
+                return 0
+            
+            # Check if there was an error in the analyst processing
+            if "error" in analyst_result:
+                logger.warning(f"Error found in analyst {key}: {analyst_result['error']}, using fallback score 0")
+                return 0
                 
             # Extract the score
             score = analyst_result.get('score')
@@ -212,14 +220,17 @@ def main():
                         return closest
                     return score_float
                 except (ValueError, TypeError):
-                    # If score can't be converted to float, log and return None
-                    logger.warning(f"Non-numeric score found for {key}: {score}, defaulting to None")
-                    return None
-            return None
+                    # If score can't be converted to float, log and use fallback score 0
+                    logger.warning(f"Non-numeric score found for {key}: {score}, using fallback score 0")
+                    return 0
+            
+            # If score is None or not found, use fallback score 0
+            logger.warning(f"No score found for {key}, using fallback score 0")
+            return 0
         except Exception as e:
-            # Catch any unexpected errors during extraction
-            logger.error(f"Error extracting score for {key}: {e}")
-            return None
+            # Catch any unexpected errors during extraction and use fallback score 0
+            logger.error(f"Error extracting score for {key}: {e}, using fallback score 0")
+            return 0
     
     # Extract individual scores from analyst_results
     analyst_keys = ["product_safety", "property_rights", "market_structure", "specific_use", 
@@ -232,7 +243,7 @@ def main():
         # Use the helper function to safely extract scores
         merged_df[column_name] = merged_df.apply(
             lambda row: extract_score(row.get('analyst_results'), key)
-            if 'analyst_results' in row else None, 
+            if 'analyst_results' in row else 0, # Use fallback 0 if analyst_results not in row 
             axis=1
         )
         

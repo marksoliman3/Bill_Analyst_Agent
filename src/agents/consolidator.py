@@ -120,6 +120,22 @@ def consolidate_results(state: AgentState) -> AgentState:
                     pass
                 
                 consolidated["analyst_results"][analyst_key] = result_with_attempts
+    
+    # Add fallback scores for any missing analyst results
+    for analyst_key in analyst_keys:
+        if analyst_key not in consolidated["analyst_results"]:
+            logger.warning(f"[CONSOLIDATOR] Missing result for analyst {analyst_key}, adding fallback score 0")
+            consolidated["analyst_results"][analyst_key] = {
+                "score": 0,
+                "justification": "Fallback score added by consolidator due to missing analyst result",
+                "attempts": 0
+            }
+        elif "score" not in consolidated["analyst_results"][analyst_key]:
+            logger.warning(f"[CONSOLIDATOR] Missing score for analyst {analyst_key}, adding fallback score 0")
+            consolidated["analyst_results"][analyst_key]["score"] = 0
+            consolidated["analyst_results"][analyst_key]["justification"] = consolidated["analyst_results"][analyst_key].get(
+                "justification", "Fallback score added by consolidator due to missing score"
+            )
 
     state["consolidated_report"] = consolidated
     logger.info(f"[CONSOLIDATOR] Created consolidated report for bill {bill_id}")
