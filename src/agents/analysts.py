@@ -273,11 +273,11 @@ def make_analyst_node(analyst_key: str):
                 state["analyst_results"] = {}
             state["analyst_results"][analyst_key] = {
                 "error": str(e),
-                "score": 0,  # Add fallback score directly with the error
+                # No fallback score so empty entries will show in the final output
                 "justification": f"Error during analysis: {str(e)}"
             }
             logger.error(
-                f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}, added fallback score 0"
+                f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}"
             )
 
         logger.info(f"[ANALYST:{analyst_key}] Completed analysis for bill {bill_id}")

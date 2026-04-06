@@ -190,19 +190,19 @@ def main():
         try:
             # Check if analyst_results is a dictionary and contains the key
             if not isinstance(analyst_results, dict):
-                logger.warning(f"analyst_results is not a dictionary, using fallback score 0 for {key}")
-                return 0
+                logger.warning(f"analyst_results is not a dictionary for {key}")
+                return None
                 
             # Get the analyst's result
             analyst_result = analyst_results.get(key, {})
             if not isinstance(analyst_result, dict):
-                logger.warning(f"Result for {key} is not a dictionary, using fallback score 0")
-                return 0
+                logger.warning(f"Result for {key} is not a dictionary")
+                return None
             
             # Check if there was an error in the analyst processing
             if "error" in analyst_result:
-                logger.warning(f"Error found in analyst {key}: {analyst_result['error']}, using fallback score 0")
-                return 0
+                logger.warning(f"Error found in analyst {key}: {analyst_result['error']}")
+                return None
                 
             # Extract the score
             score = analyst_result.get('score')
@@ -222,17 +222,17 @@ def main():
                         return closest
                     return score_float
                 except (ValueError, TypeError):
-                    # If score can't be converted to float, log and use fallback score 0
-                    logger.warning(f"Non-numeric score found for {key}: {score}, using fallback score 0")
-                    return 0
+                    # If score can't be converted to float, log and return None
+                    logger.warning(f"Non-numeric score found for {key}: {score}")
+                    return None
             
-            # If score is None or not found, use fallback score 0
-            logger.warning(f"No score found for {key}, using fallback score 0")
-            return 0
+            # If score is None or not found, return None
+            logger.warning(f"No score found for {key}")
+            return None
         except Exception as e:
-            # Catch any unexpected errors during extraction and use fallback score 0
-            logger.error(f"Error extracting score for {key}: {e}, using fallback score 0")
-            return 0
+            # Catch any unexpected errors during extraction and return None
+            logger.error(f"Error extracting score for {key}: {e}")
+            return None
     
     # Extract individual scores from analyst_results
     analyst_keys = ["product_safety", "property_rights", "market_structure", "specific_use", 
@@ -245,7 +245,7 @@ def main():
         # Use the helper function to safely extract scores
         merged_df[column_name] = merged_df.apply(
             lambda row: extract_score(row.get('analyst_results'), key)
-            if 'analyst_results' in row else 0, # Use fallback 0 if analyst_results not in row 
+            if 'analyst_results' in row else None, # Return None if analyst_results not in row 
             axis=1
         )
         
