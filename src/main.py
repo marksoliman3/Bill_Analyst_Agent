@@ -131,7 +131,7 @@ def main():
         final_state["status"] = status
         
         # Create a cleaned version of the state with only the needed fields
-        # Prioritize the consolidated results which include fallbacks for missing analysts
+        # Prioritize the consolidated results
         consolidated_results = final_state.get("consolidated_report", {}).get("analyst_results", {})
         cleaned_state = {
             "bill_id": final_state.get("bill_id", ""),
@@ -173,19 +173,19 @@ def main():
         if col in results_df.columns:
             merged_df[col] = results_df[col]
     
-    # Helper function to safely extract scores with fallback to 0
+    # Helper function to safely extract scores (returns None when missing or errored)
     def extract_score(analyst_results, key):
         """
         Safely extract a score from analyst results with robust error handling.
         Ensures the score is one of the valid values: 0, 0.5, or 1.
-        Uses a fallback score of 0 when errors are detected.
-        
+        Returns None when scores are missing or errored so failures surface as empty cells.
+
         Args:
             analyst_results: The dictionary of analyst results
             key: The analyst key to extract score for
-            
+
         Returns:
-            float: The extracted score (0, 0.5, or 1), with a fallback of 0 for errors
+            float or None: The extracted score (0, 0.5, or 1), or None if missing/errored
         """
         try:
             # Check if analyst_results is a dictionary and contains the key

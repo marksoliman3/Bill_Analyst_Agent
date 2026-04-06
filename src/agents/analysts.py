@@ -109,8 +109,8 @@ class SanitizedJsonOutputParser(JsonOutputParser):
                         score_value = float(score_value)
                         result["score"] = score_value
                     except ValueError:
-                        logger.warning(f"Non-numeric score found: {score_value}, defaulting to 0")
-                        result["score"] = 0
+                        logger.warning(f"Non-numeric score found: {score_value} — removing score so it surfaces as empty")
+                        del result["score"]
                 
                 # Ensure score is one of the valid values
                 if result["score"] not in [0, 0.5, 1]:
@@ -140,8 +140,8 @@ class SanitizedJsonOutputParser(JsonOutputParser):
                                 score_value = float(score_value)
                                 result["score"] = score_value
                             except ValueError:
-                                logger.warning(f"Non-numeric score found in fallback parsing: {score_value}, defaulting to 0")
-                                result["score"] = 0
+                                logger.warning(f"Non-numeric score found in fallback parsing: {score_value} — removing score so it surfaces as empty")
+                                del result["score"]
                                 
                         # Ensure score is one of the valid values
                         if result["score"] not in [0, 0.5, 1]:
