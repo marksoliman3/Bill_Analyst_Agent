@@ -9,7 +9,7 @@ The system is part of the **CATS** (presumably a policy research initiative) pro
 ## How to Run
 
 ```bash
-# Activate venv
+# Activate the existing venv (venv/ at project root, not checked into git)
 source venv/bin/activate
 
 # Set OPENAI_API_KEY in .env (already gitignored)

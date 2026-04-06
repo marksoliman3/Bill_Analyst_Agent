@@ -41,14 +41,36 @@ def judge_analysis(state: AgentState) -> AgentState:
     # Collect inputs
     bill_text = state.get("bill_text", "")
 
-    # Get analyst outputs from the analyst_results field
+    # Get analyst outputs from the analyst_results field and sanitize for safe serialization
     if (
         "analyst_results" in state
         and isinstance(state["analyst_results"], dict)
         and state["analyst_results"]
     ):
-        analyst_outputs = state["analyst_results"]
-        logger.info(f"[JUDGE] Found {len(analyst_outputs)} analyst outputs for bill {bill_id}")
+        raw_analyst_outputs = state["analyst_results"]
+        logger.info(f"[JUDGE] Found {len(raw_analyst_outputs)} analyst outputs for bill {bill_id}")
+
+        # Sanitize analyst outputs to prevent malformed error strings from breaking
+        # the Judge's API call (e.g., raw LLM garbage in error messages)
+        analyst_outputs = {}
+        for key, value in raw_analyst_outputs.items():
+            if isinstance(value, dict):
+                if "error" in value:
+                    # Replace raw error content with a clean summary
+                    analyst_outputs[key] = {
+                        "error": "Analysis failed",
+                        "score": value.get("score"),
+                        "justification": value.get("justification", "Error during analysis")[:500]
+                    }
+                else:
+                    # Keep clean results but truncate overly long justifications
+                    sanitized = {
+                        "score": value.get("score"),
+                        "justification": str(value.get("justification", ""))[:2000]
+                    }
+                    analyst_outputs[key] = sanitized
+            else:
+                analyst_outputs[key] = {"error": "Invalid result format", "score": None}
     else:
         logger.warning(f"[JUDGE] No analyst outputs found for bill {bill_id}")
         updated_state["judgement"] = {

@@ -59,102 +59,106 @@ def call_llm_with_retry(chain, inputs):
     return chain.invoke(inputs)
 
 
-def sanitize_for_json(text: str) -> str:
+def extract_json_from_text(text: str) -> str:
     """
-    Sanitize the text to ensure it can be properly parsed as JSON.
-    Escapes apostrophes and other problematic characters.
-    
+    Extract the JSON object from LLM output text by finding the outermost { } boundaries.
+    Handles cases where the LLM wraps JSON in markdown fences, preamble text, etc.
+
     Args:
-        text (str): The text to sanitize
-        
+        text (str): Raw LLM output that may contain JSON wrapped in other text
+
     Returns:
-        str: Sanitized text that can be safely parsed as JSON
+        str: The extracted JSON string
+
+    Raises:
+        ValueError: If no JSON-like content can be found
     """
-    # Handle apostrophes in strings
-    text = text.replace("'", "\\'")
-    # Handle other potentially problematic characters
-    text = text.replace('\n', '\\n')
-    text = text.replace('\r', '\\r')
-    text = text.replace('\t', '\\t')
-    # Log that we're sanitizing the text
-    logger.debug(f"Sanitized text for JSON parsing: {text[:100]}...")
-    return text
+    # Strip markdown code fences if present
+    import re
+    fenced = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if fenced:
+        return fenced.group(1)
+
+    # Find the outermost { } boundaries
+    start_idx = text.find('{')
+    end_idx = text.rfind('}')
+    if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+        return text[start_idx:end_idx + 1]
+
+    raise ValueError("Could not find JSON-like content in LLM output")
+
+
+def validate_score(result: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Validate and normalize the score field in an analyst result.
+    Ensures score is exactly 0, 0.5, or 1. Removes invalid scores.
+
+    Args:
+        result: Parsed analyst result dict
+
+    Returns:
+        The result dict with validated score
+    """
+    if "score" not in result:
+        return result
+
+    score_value = result["score"]
+
+    # Convert string scores to float
+    if isinstance(score_value, str):
+        try:
+            score_value = float(score_value)
+            result["score"] = score_value
+        except ValueError:
+            logger.warning(f"Non-numeric score found: {score_value} — removing score so it surfaces as empty")
+            del result["score"]
+            return result
+
+    # Coerce to nearest valid value if needed
+    valid_scores = [0, 0.5, 1]
+    if result["score"] not in valid_scores:
+        closest = min(valid_scores, key=lambda x: abs(x - float(result["score"])))
+        logger.warning(f"Invalid score {result['score']} coerced to nearest valid value: {closest}")
+        result["score"] = closest
+
+    return result
 
 
 class SanitizedJsonOutputParser(JsonOutputParser):
     """
-    A JSON output parser that sanitizes the text before parsing.
+    A JSON output parser that extracts JSON from LLM output robustly.
+    Handles markdown fences, preamble text, and other wrapping.
     Also validates and enforces the score to be only 0, 0.5, or 1.
     """
-    
+
     def parse(self, text: str) -> Dict[str, Any]:
         """
-        Parse the text into a JSON object, sanitizing it first.
-        
+        Parse the text into a JSON object by first extracting JSON content,
+        then falling back to the parent parser if extraction fails.
+
         Args:
-            text (str): The text to parse
-            
+            text (str): The raw LLM output text
+
         Returns:
             Dict[str, Any]: The parsed JSON object with validated score
         """
-        sanitized_text = sanitize_for_json(text)
+        # Primary path: extract JSON from the text and parse directly
         try:
-            result = super().parse(sanitized_text)
-            # Validate and normalize score to ensure it's exactly 0, 0.5, or 1
-            if "score" in result:
-                score_value = result["score"]
-                # Convert to float if it's a string but looks like a number
-                if isinstance(score_value, str):
-                    try:
-                        score_value = float(score_value)
-                        result["score"] = score_value
-                    except ValueError:
-                        logger.warning(f"Non-numeric score found: {score_value} — removing score so it surfaces as empty")
-                        del result["score"]
-                
-                # Ensure score is one of the valid values
-                if result["score"] not in [0, 0.5, 1]:
-                    # Find the closest valid score
-                    valid_scores = [0, 0.5, 1]
-                    closest = min(valid_scores, key=lambda x: abs(x - float(result["score"])))
-                    logger.warning(f"Invalid score {result['score']} coerced to nearest valid value: {closest}")
-                    result["score"] = closest
-            return result
+            json_str = extract_json_from_text(text)
+            result = json.loads(json_str)
+            logger.debug(f"Successfully parsed JSON via direct extraction")
+            return validate_score(result)
+        except (ValueError, json.JSONDecodeError) as extraction_err:
+            logger.debug(f"Direct JSON extraction failed: {extraction_err}")
+
+        # Fallback: try the parent LangChain parser on the raw text
+        try:
+            result = super().parse(text)
+            logger.debug(f"Successfully parsed JSON via LangChain parent parser")
+            return validate_score(result)
         except Exception as e:
-            logger.warning(f"JSON parsing failed even after sanitization: {e}")
-            # If parsing still fails, try a more direct approach with json.loads
-            try:
-                # Find JSON-like content using a simple heuristic
-                start_idx = text.find('{')
-                end_idx = text.rfind('}')
-                if start_idx != -1 and end_idx != -1:
-                    json_text = text[start_idx:end_idx+1]
-                    sanitized_json = sanitize_for_json(json_text)
-                    result = json.loads(sanitized_json)
-                    
-                    # Apply the same score validation as above
-                    if "score" in result:
-                        score_value = result["score"]
-                        if isinstance(score_value, str):
-                            try:
-                                score_value = float(score_value)
-                                result["score"] = score_value
-                            except ValueError:
-                                logger.warning(f"Non-numeric score found in fallback parsing: {score_value} — removing score so it surfaces as empty")
-                                del result["score"]
-                                
-                        # Ensure score is one of the valid values
-                        if result["score"] not in [0, 0.5, 1]:
-                            valid_scores = [0, 0.5, 1]
-                            closest = min(valid_scores, key=lambda x: abs(x - float(result["score"])))
-                            logger.warning(f"Invalid score {result['score']} in fallback parsing coerced to nearest valid value: {closest}")
-                            result["score"] = closest
-                    return result
-                else:
-                    raise ValueError("Could not find JSON-like content")
-            except Exception as inner_e:
-                logger.error(f"All JSON parsing attempts failed: {inner_e}")
-                raise e  # Re-raise the original exception
+            logger.error(f"All JSON parsing attempts failed for text: {text[:200]}...")
+            raise e
 
 
 def make_analyst_node(analyst_key: str):
@@ -242,14 +246,39 @@ def make_analyst_node(analyst_key: str):
         )
         chain = prompt | llm | parser
 
-        try:
-            logger.info(f"[ANALYST:{analyst_key}] Calling LLM for bill {bill_id}")
-            # Use the retry wrapper instead of calling directly
-            result = call_llm_with_retry(chain, {"bill_extracts": bill_extracts})
-            logger.info(
-                f"[ANALYST:{analyst_key}] LLM call completed for bill {bill_id}"
-            )
+        # Retry loop: retries on parse failures to give the LLM another chance
+        max_parse_attempts = 3
+        last_error = None
+        result = None
 
+        for attempt in range(1, max_parse_attempts + 1):
+            try:
+                logger.info(f"[ANALYST:{analyst_key}] Calling LLM for bill {bill_id} (attempt {attempt}/{max_parse_attempts})")
+                # Use the retry wrapper (handles API-level errors like 500s/timeouts)
+                raw_result = call_llm_with_retry(chain, {"bill_extracts": bill_extracts})
+
+                # Guard against None/empty responses (Fix 3)
+                if raw_result is None:
+                    raise ValueError("LLM returned None response")
+                if isinstance(raw_result, dict) and "score" not in raw_result and "justification" not in raw_result:
+                    raise ValueError(f"LLM returned response with no score or justification: {raw_result}")
+
+                result = raw_result
+                logger.info(f"[ANALYST:{analyst_key}] LLM call completed for bill {bill_id}")
+                break  # Success — exit retry loop
+
+            except Exception as e:
+                last_error = e
+                if attempt < max_parse_attempts:
+                    logger.warning(
+                        f"[ANALYST:{analyst_key}] Attempt {attempt}/{max_parse_attempts} failed for bill {bill_id}: {e}. Retrying..."
+                    )
+                else:
+                    logger.error(
+                        f"[ANALYST:{analyst_key}] All {max_parse_attempts} attempts failed for bill {bill_id}: {e}"
+                    )
+
+        if result is not None:
             # Initialize analyst_results if it doesn't exist
             if "analyst_results" not in state:
                 state["analyst_results"] = {}
@@ -263,22 +292,18 @@ def make_analyst_node(analyst_key: str):
             logger.info(
                 f"[ANALYST:{analyst_key}] Assigned score {score} with justification of {justification_length} characters for bill {bill_id}"
             )
-            
+
             # If this is part of a multi-analyst revision, log that the revision is complete
             if is_revision:
                 logger.info(f"[ANALYST:{analyst_key}] Completed revision as part of multi-analyst revision")
-        except Exception as e:
-            logger.error(f"[ANALYST:{analyst_key}] Failed for bill {bill_id}: {e}")
+        else:
+            logger.error(f"[ANALYST:{analyst_key}] Failed for bill {bill_id}: {last_error}")
             if "analyst_results" not in state:
                 state["analyst_results"] = {}
             state["analyst_results"][analyst_key] = {
-                "error": str(e),
-                # No fallback score so empty entries will show in the final output
-                "justification": f"Error during analysis: {str(e)}"
+                "error": str(last_error),
+                "justification": f"Error during analysis: {str(last_error)}"
             }
-            logger.error(
-                f"[ANALYST:{analyst_key}] State update: {analyst_key}_analysis -> error {e}"
-            )
 
         logger.info(f"[ANALYST:{analyst_key}] Completed analysis for bill {bill_id}")
         return state
