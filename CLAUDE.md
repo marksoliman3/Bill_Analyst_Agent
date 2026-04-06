@@ -45,7 +45,7 @@ Extractor -> Summarizer -> Analyst_1 -> Analyst_2 -> ... -> Analyst_7 -> Judge -
 
 4. **Judge** (`src/agents/judge.py`) - Quality control agent that reviews all analyst scores against the bill text. Uses `gpt-5-nano`. Can AGREE (pass to finalize), request MULTI_ANALYST_REVISION (send specific analysts back with feedback), or FAIL_BILL. Max retry attempts controlled by `MAX_RETRY_ATTEMPTS` in config (currently 1).
 
-5. **Consolidator** (`src/agents/consolidator.py`) - Aggregates all outputs into a final consolidated report. No LLM call -- pure Python aggregation. Adds fallback scores (0) for missing analysts.
+5. **Consolidator** (`src/agents/consolidator.py`) - Aggregates all outputs into a final consolidated report. No LLM call -- pure Python aggregation. Missing analysts/scores surface as empty (no fallback values).
 
 ### State Management
 
@@ -120,6 +120,18 @@ src/
 
 Core: `langgraph`, `langchain`, `langchain-core`, `langchain-openai`, `pydantic`, `pandas`, `python-dotenv`
 Retry: `tenacity` (used in analysts.py, not listed in requirements.txt)
+
+## Data & Batch Workflow
+
+The full dataset is 1,532 bills in `data/input/raw_full_bills_with_intro_dates.csv`. These are split into 4 batches (`bills_part_1.csv` through `bills_part_4.csv`) to keep run times manageable and reduce error risk. The workflow:
+
+1. Rename the target batch file to `bills.csv` (e.g., `bills_part_1.csv` -> `bills.csv`). The config always reads from `data/input/bills.csv`.
+2. Run the pipeline (`python -m src.main`)
+3. Rename `bills.csv` back to its original name, and rename the output from `analysis_results.csv` to `analysis_results_1.csv` (matching the batch number)
+4. Repeat for each batch
+5. Concatenate the 4 result files into `Final_Database_<version>.csv`
+
+Previous version outputs are archived in `data/output/Previous_Versions/`.
 
 ## Things to Know
 
