@@ -2,10 +2,101 @@ from src.config import INPUT_CSV_PATH, OUTPUT_CSV_PATH, MAX_RETRY_ATTEMPTS
 from src.tools.file_io_tools import read_bill_data, write_analysis_results
 from src.state import AgentState
 import pandas as pd
+import re
 import logging
 
 # Get logger for this module
 logger = logging.getLogger(__name__)
+
+# --- AI Keyword Pre-Filter ---
+
+AI_KEYWORDS = [
+    # Core AI terms
+    r"\bartificial intelligence\b",
+    r"\bmachine learning\b",
+    r"\bdeep learning\b",
+    r"\breinforcement learning\b",
+    r"\bneural network\b",
+    r"\blarge language model\b",
+    r"\bgenerative ai\b",
+    r"\bfoundation model\b",
+    r"\bfrontier model\b",
+    r"\bnatural language processing\b",
+    r"\bcomputer vision\b",
+    # Specific AI applications
+    r"\bdeepfake\b",
+    r"\bchatbot\b",
+    r"\bfacial recognition\b",
+    r"\bvoice clon(?:e|ing)\b",
+    r"\bautonomous vehicle\b",
+    # Compound AI-specific phrases
+    r"\bautomated decision (?:system|tool)\b",
+    r"\bautomated employment decision\b",
+    r"\balgorithmic discrimination\b",
+    r"\balgorithmic accountability\b",
+    # Standalone abbreviation (word-boundary matched)
+    r"\bAI\b",
+]
+
+INCIDENTAL_PATTERNS = [
+    # AI as one item in a laundry list of technologies
+    r"including artificial intelligence.{0,120}(?:other technologies|tools|methods)",
+    # AI explicitly excluded from the bill's scope
+    r"artificial intelligence.{0,80}(?:is excluded|not a person|cannot be a person|cannot be granted)",
+    # Definitional cross-references only
+    r"artificial intelligence.{0,80}has the meaning given",
+    r"as defined in.{0,80}artificial intelligence",
+]
+
+CEREMONIAL_PATTERNS = [
+    r"\bcommend(?:ing|ed|s)?\b",
+    r"\bcongratulat(?:e|es|ed|ing|ions?)?\b",
+    r"\bin memoriam\b",
+    r"\byears of service\b",
+    r"\bresolution honoring\b",
+    r"\bresolution commending\b",
+]
+
+_ai_keyword_pattern = re.compile("|".join(AI_KEYWORDS), re.IGNORECASE)
+_incidental_pattern = re.compile("|".join(INCIDENTAL_PATTERNS), re.IGNORECASE)
+_ceremonial_pattern = re.compile("|".join(CEREMONIAL_PATTERNS), re.IGNORECASE)
+
+
+def is_ai_related(bill_text: str) -> bool:
+    """
+    Determine if a bill is substantively about AI based on keyword matching
+    with incidental mention and ceremonial context filtering.
+
+    Returns True if the bill should be sent through the full analysis pipeline.
+    Returns False if the bill should be skipped (all scores set to 0).
+    """
+    if not bill_text:
+        return False
+
+    text_lower = bill_text.lower()
+
+    # Count AI keyword hits
+    keyword_hits = len(_ai_keyword_pattern.findall(bill_text))
+    if keyword_hits == 0:
+        return False
+
+    # If strong signal (3+ keyword hits), pass through regardless
+    if keyword_hits >= 3:
+        return True
+
+    # For weak signal (1-2 hits), check for incidental/ceremonial context
+    is_incidental = bool(_incidental_pattern.search(text_lower))
+    is_ceremonial = bool(_ceremonial_pattern.search(text_lower))
+
+    if is_incidental:
+        logger.info(f"[AI_FILTER] Bill has {keyword_hits} AI keyword hit(s) but matches incidental pattern — filtering out")
+        return False
+
+    if is_ceremonial:
+        logger.info(f"[AI_FILTER] Bill has {keyword_hits} AI keyword hit(s) but matches ceremonial pattern — filtering out")
+        return False
+
+    return True
 
 
 def main():
@@ -27,6 +118,22 @@ def main():
 
         # Store original bill data
         original_bill_data.append(bill.to_dict())
+
+        # AI keyword pre-filter: skip bills that are not AI-related
+        bill_text_raw = bill["Bill_Text"] if "Bill_Text" in bill else ""
+        if not is_ai_related(bill_text_raw):
+            logger.info(f"[AI_FILTER] Bill {bill_id} filtered out — not AI-related")
+            results.append({
+                "bill_id": bill_id,
+                "bill_extracts": "",
+                "summary": "",
+                "analyst_results": {},
+                "retry_attempts": {},
+                "status": "filtered_not_ai"
+            })
+            continue
+
+        logger.info(f"[AI_FILTER] Bill {bill_id} passed AI keyword filter")
 
         # Create a properly structured state dictionary
         state = {
