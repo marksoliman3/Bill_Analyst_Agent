@@ -28,14 +28,16 @@ These paths are configured in `src/config.py`. The `data/` directory is gitignor
 
 ### Graph of Graphs (LangGraph)
 
-The pipeline is orchestrated in `src/graph.py` as a LangGraph `StateGraph` using `AgentState` (defined in `src/state.py`). Each agent is its own compiled subgraph:
+The pipeline is orchestrated in `src/graph.py` as a LangGraph `StateGraph` using `AgentState` (defined in `src/state.py`). Before entering the graph, each bill passes through a cheap keyword pre-filter (see below). Bills that pass the filter are processed by the full agent pipeline:
 
 ```
-Extractor -> Summarizer -> Analyst_1 -> Analyst_2 -> ... -> Analyst_7 -> Judge -> Consolidator -> END
-                                                                           |
-                                                                           v (if REVISE)
-                                                                    Analyst(s) needing revision -> Judge (loop)
+[AI Keyword Pre-Filter] -> Extractor -> Summarizer -> Analyst_1 -> ... -> Analyst_7 -> Judge -> Consolidator -> END
+                                                                                         |
+                                                                                         v (if REVISE)
+                                                                                  Analyst(s) needing revision -> Judge (loop)
 ```
+
+0. **AI Keyword Pre-Filter** (`src/main.py`: `is_ai_related()`) - Regex-based gate that runs before the LangGraph pipeline. Bills must contain at least one AI-specific keyword (e.g., "artificial intelligence", "machine learning", "neural network", "deepfake", "AI") to proceed. Bills with 3+ keyword hits pass automatically. Bills with 1-2 hits are checked against incidental patterns (AI mentioned in a laundry list or cross-reference) and ceremonial patterns (commendations, memorials) — if either matches, the bill is filtered out. Filtered bills get `status: "filtered_not_ai"` with empty scores, saving API calls. On the full 1,532-bill dataset, this filters ~266 bills including ~154 that were previously over-scored by the LLM analysts (e.g., algorithmic rent pricing, intimate images, insurance telematics — bills that use words like "algorithm" but are not about AI).
 
 1. **Extractor** (`src/agents/extractor.py`) - Parses raw bill text into relevant extracts. Uses `gpt-4o-mini`. Extracts sections relevant to the seven AI policy dimensions. Has fallback logic for minimal extractions.
 
@@ -89,7 +91,7 @@ Each analyst config has: `persona`, `scope` (with threshold questions and critic
 
 ```
 src/
-  main.py                              # Entry point. Iterates bills, invokes graph, merges results to output CSV
+  main.py                              # Entry point. AI keyword pre-filter, iterates bills, invokes graph, merges results to output CSV
   graph.py                             # LangGraph orchestration. Builds the full graph with conditional routing
   state.py                             # AgentState TypedDict + Pydantic output models
   config.py                            # Env vars, file paths, retry settings, logging setup
@@ -110,9 +112,10 @@ src/
 
 - **LLM models**: Extractor and Summarizer use `gpt-4o-mini`. Analysts and Judge use `gpt-5-nano`. All at `temperature=0`.
 - **Output format**: Analysts output `{score, justification}` as JSON. Judge outputs nested `{judgement: {decision, next_step, analysts_needing_revision, feedback_by_analyst}}`.
-- **Error handling**: Analysts use `tenacity` retry with exponential backoff for transient OpenAI errors (500s, timeouts, rate limits). `SanitizedJsonOutputParser` handles malformed JSON from LLMs. Fallback scores of 0 are added by the consolidator for missing results.
+- **AI pre-filter keywords**: Defined in `AI_KEYWORDS`, `INCIDENTAL_PATTERNS`, and `CEREMONIAL_PATTERNS` at the top of `src/main.py`. The keyword list intentionally excludes broader tech terms like "algorithm", "automated system", "digital replica" — these trigger over-scoring on non-AI bills. Only AI-specific terms are included.
+- **Error handling**: Analysts use `tenacity` retry with exponential backoff for transient OpenAI errors (500s, timeouts, rate limits). `SanitizedJsonOutputParser` handles malformed JSON from LLMs with `extract_json_from_text()` fallback. Parse failures trigger up to 3 re-prompts before giving up.
 - **Score validation**: Scores are validated at multiple layers -- Pydantic validator in `AnalystOutput`, `SanitizedJsonOutputParser`, and `extract_score()` in main.py. Invalid scores are coerced to nearest valid value (0, 0.5, or 1).
-- **Logging**: Every agent logs extensively with prefixes like `[EXTRACTOR]`, `[ANALYST:key]`, `[JUDGE]`, `[CONSOLIDATOR]`, `[GRAPH]`. Logs go to both console and timestamped file in `data/output/logs/`.
+- **Logging**: Every agent logs extensively with prefixes like `[AI_FILTER]`, `[EXTRACTOR]`, `[ANALYST:key]`, `[JUDGE]`, `[CONSOLIDATOR]`, `[GRAPH]`. Logs go to both console and timestamped file in `data/output/logs/`.
 - **Config as single source of truth**: Agent prompts/personas are centralized in `analysts_config.py` and `nonanalysts_config.py`. The `analysts.py` factory reads these configs dynamically.
 - **Output CSV**: Merges original input columns with analysis results. Individual score columns (e.g., `product_safety_score`) are extracted for easy filtering.
 

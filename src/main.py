@@ -127,7 +127,7 @@ def main():
                 "bill_id": bill_id,
                 "bill_extracts": "",
                 "summary": "",
-                "analyst_results": {},
+                "analyst_results": {k: {"score": 0, "justification": "Filtered out by AI keyword pre-filter"} for k in ["product_safety", "property_rights", "market_structure", "specific_use", "societal_risks", "institutional_processes", "funding_economic"]},
                 "retry_attempts": {},
                 "status": "filtered_not_ai"
             })
