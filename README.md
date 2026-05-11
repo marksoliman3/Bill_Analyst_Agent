@@ -37,12 +37,12 @@ Each bill is analyzed across seven critical dimensions by specialized AI analyst
 | Dimension | What It Measures |
 |-----------|------------------|
 | 🛡️ **Product Safety, Accountability, & Risk** | How the bill addresses safety testing, reliability standards, transparency, and accountability |
-| 📜 **Property Rights, Attribution, & Data** | How the bill impacts IP rights, creator compensation, and consumer data privacy |
+| 📜 **AI Inputs & IP** | How the bill impacts IP rights, creator compensation, and consumer data privacy |
 | 🏢 **Market Structure & Competition** | How the bill ensures fair competition, data sharing, and computing resource allocation |
 | 🔍 **Specific Use & Sectoral Regulation** | How the bill regulates AI in high-risk sectors, employment, and content policies |
 | 🌍 **Existential and Societal Risks** | How the bill addresses labor markets, environmental sustainability, and democratic processes |
 | ⚖️ **Institutional Processes & Governance** | How the bill establishes advisory bodies, regulatory frameworks, and agency authorities |
-| 💰 **Funding & Economic Development** | How the bill allocates resources, creates incentives, and invests in infrastructure |
+| 💰 **AI Advancement & Development** | How the bill allocates resources, creates incentives, and invests in infrastructure |
 
 ### 4. Quality Assurance
 A specialized "Judge" agent reviews all analyses, providing feedback and triggering revisions when needed to ensure consistent, high-quality results.
@@ -53,7 +53,7 @@ Results are delivered in a clean, structured format that makes it easy to compar
 - The original bill data preserved from the input CSV
 - Extracted relevant bill text and plain-language summary
 - Detailed analyst results with scores and justifications
-- **Individual score columns** for each dimension (e.g., `market_structure_score`, `property_rights_score`) for easy filtering and analysis
+- **Individual score columns** for each dimension (e.g., `market_structure_score`, `ai_inputs_ip_score`) for easy filtering and analysis
 - Processing status and metadata
 
 ## 💻 Technical Overview

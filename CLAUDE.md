@@ -72,12 +72,12 @@ All defined in `src/agents/configs/analysts_config.py`:
 | Key | Dimension | Focus |
 |-----|-----------|-------|
 | `product_safety` | Product Safety, Accountability, & Risk | AI developer/vendor safety obligations (build-side only) |
-| `property_rights` | Property Rights, Attribution, & Data | IP ownership, data-as-property, likeness rights, compensation |
+| `ai_inputs_ip` | AI Inputs & IP | IP ownership, data-as-property, likeness rights, compensation |
 | `market_structure` | Market Structure & Competition | Antitrust, competitive access, algorithmic collusion |
 | `specific_use` | Specific Use & Sectoral Regulation | Sector-specific AI rules (healthcare, employment, deepfakes, etc.) |
 | `societal_risks` | Existential and Societal Risks | Labor displacement, environment, election infrastructure, catastrophic risk |
 | `institutional_processes` | Institutional Processes & Governance | Creation of oversight bodies, study mandates, regulatory sandboxes |
-| `funding_economic` | Funding & Economic Development | Appropriations, tax incentives, workforce training funding |
+| `ai_advancement` | AI Advancement & Development | Appropriations, tax incentives, workforce training funding |
 
 Each analyst config has: `persona`, `scope` (with threshold questions and critical exclusions), `task_instructions`, `revision_instructions`, `scoring_rubric`, and `output_schema`.
 

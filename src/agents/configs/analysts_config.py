@@ -124,8 +124,8 @@ ANALYST_DEFINITIONS = {
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },
-    "property_rights": {
-        "name": "Property Rights, Attribution, & Data Analyst",
+    "ai_inputs_ip": {
+        "name": "AI Inputs & IP Analyst",
         "persona": (
             "You are a seasoned intellectual property (IP) lawyer specializing in copyright, "
             "data rights, and creator compensation in the digital age. You focus on "
@@ -222,7 +222,7 @@ ANALYST_DEFINITIONS = {
             "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
-        "taxonomy_dimension": "Property Rights, Attribution, & Data",
+        "taxonomy_dimension": "AI Inputs & IP",
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },
@@ -581,8 +581,8 @@ ANALYST_DEFINITIONS = {
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },
-    "funding_economic": {
-        "name": "Funding & Economic Development Analyst",
+    "ai_advancement": {
+        "name": "AI Advancement & Development Analyst",
         "persona": (
             "You are an economic policy expert specializing in fiscal action, public investment, "
             "and economic development initiatives. You analyze how legislation allocates resources "
@@ -644,7 +644,7 @@ ANALYST_DEFINITIONS = {
             "- score: A number that must be exactly 0, 0.5, or 1\n"
             "- justification: A string explaining your reasoning"
         ),
-        "taxonomy_dimension": "Funding & Economic Development",
+        "taxonomy_dimension": "AI Advancement & Development",
         "scoring_rubric": SCORING_RUBRIC,
         "output_schema": OUTPUT_SCHEMA,
     },

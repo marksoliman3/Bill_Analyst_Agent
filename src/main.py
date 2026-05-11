@@ -127,7 +127,7 @@ def main():
                 "bill_id": bill_id,
                 "bill_extracts": "",
                 "summary": "",
-                "analyst_results": {k: {"score": 0, "justification": "Filtered out by AI keyword pre-filter"} for k in ["product_safety", "property_rights", "market_structure", "specific_use", "societal_risks", "institutional_processes", "funding_economic"]},
+                "analyst_results": {k: {"score": 0, "justification": "Filtered out by AI keyword pre-filter"} for k in ["product_safety", "ai_inputs_ip", "market_structure", "specific_use", "societal_risks", "institutional_processes", "ai_advancement"]},
                 "retry_attempts": {},
                 "status": "filtered_not_ai"
             })
@@ -342,8 +342,8 @@ def main():
             return None
     
     # Extract individual scores from analyst_results
-    analyst_keys = ["product_safety", "property_rights", "market_structure", "specific_use", 
-                    "societal_risks", "institutional_processes", "funding_economic"]
+    analyst_keys = ["product_safety", "ai_inputs_ip", "market_structure", "specific_use",
+                    "societal_risks", "institutional_processes", "ai_advancement"]
     score_columns = [f"{key}_score" for key in analyst_keys]
     
     # Create columns for individual scores
