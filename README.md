@@ -1,5 +1,20 @@
 # 📊 Bill Analyst: AI-Powered Legislative Analysis
 
+## Citation
+
+This repository accompanies:
+
+Bhargava, H. K., & Soliman, M. (in preparation). The Structure of U.S. State AI Policy: Evidence from a Multi-Dimensional Bill Classification.
+
+The version of the code used to produce the analyses in the paper is tagged as `v1.0.1-rp-submission`.
+
+## Dataset
+
+The full dataset of 2,571 classified bills, validation annotations from three independent annotators, and complete database construction documentation are archived on Zenodo:
+
+- **Concept DOI** (always latest): [10.5281/zenodo.20348531](https://doi.org/10.5281/zenodo.20348531)
+- **This version**: [10.5281/zenodo.20348820](https://doi.org/10.5281/zenodo.20348820)
+
 # Multi-Agent Architecture Codebase: 
 https://github.com/marksoliman3/Bill_Analyst_Agent/tree/main
 
