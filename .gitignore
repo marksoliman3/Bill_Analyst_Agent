@@ -26,3 +26,5 @@ Thumbs.db
 pytest.ini
 test_openai_key.py
 test_parser.py
+
+CLAUDE.md
